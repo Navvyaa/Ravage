@@ -41,8 +41,6 @@ video {
             }
             #modalContent{
     width:60%;
-    /* height:60%; */
-    /* background-color: black; */
     display: flex;
     flex-direction: column;
     align-items: center;

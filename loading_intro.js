@@ -124,6 +124,60 @@ window.onload = function () {
         window.addEventListener('keydown', handleKeyPress);
     }
 
+
+
+   //function createControlWindow is to introduce controls to run game  
+   function createControlWindow() {
+    
+
+    canvas.style.display="none";
+
+
+    const modal = document.createElement('div');
+    modal.setAttribute('id','controlModal');
+   
+
+    // Created the modal for content box
+    const modalContent = document.createElement('div');
+    modalContent.setAttribute('id','modalContent');
+    
+
+    // Created the heading for the modal
+    const header = document.createElement('h2');
+    header.innerText = 'Game Controls';
+    modalContent.appendChild(header);
+
+    // All the control instruction used in game 
+    const instructions = document.createElement('div');
+    instructions.style.fontFamily = 'Arial, sans-serif';
+    instructions.innerHTML = `
+        <p><strong>Move Forward:</strong> W</p>
+        <p><strong>Move Backward:</strong> S</p>
+        <p><strong>Rotate Left:</strong> A</p>
+        <p><strong>Rotate Right:</strong> D</p>
+        
+    `;
+    modalContent.appendChild(instructions);
+
+    // Created a close button to close control window
+    const closeButton = document.createElement('button');
+    closeButton.innerText = 'Close';
+   closeButton.id="closeBtn"
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(modal);
+    showImageScreen();
+    });
+
+    modalContent.appendChild(closeButton);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+}
+
+
+
+
+
     function handleButtonClick(event) {
         const rect = canvas.getBoundingClientRect();
         const mouseX = event.clientX - rect.left;
@@ -155,7 +209,8 @@ window.onload = function () {
             window.location.href = "game/game.html";    
             break;
             case 1:
-                window.location.href="control.html"
+                // window.location.href="control.html"
+                createControlWindow();
                 break;
             case 2:
                 alert("Quit clicked!");
@@ -164,6 +219,10 @@ window.onload = function () {
                 break;
         }
     }
+
+
+
+// function to load game assets
 
     loadGameAssets();
 
@@ -177,6 +236,4 @@ window.onload = function () {
 
 
 
-
-
-
+     
