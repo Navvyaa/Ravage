@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA-2</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="loading_intro.js"></script>
+</head>
+<body>
+
+    <script>
+        // Create the modal and control window elements dynamically using JS
+        function createControlWindow() {
+            // Create the modal container
+            const modal = document.createElement('div');
+            modal.setAttribute('id','controlModal');
+           
+
+            // Created the modal for content box
+            const modalContent = document.createElement('div');
+            modalContent.setAttribute('id','modalContent');
+            
+
+            // Created the header for the modal
+            const header = document.createElement('h2');
+            header.innerText = 'Game Controls';
+            modalContent.appendChild(header);
+
+            // Created control instructions
+            const instructions = document.createElement('div');
+            instructions.style.fontFamily = 'Arial, sans-serif';
+            instructions.innerHTML = `
+                <p><strong>Move Forward:</strong> W</p>
+                <p><strong>Move Backward:</strong> S</p>
+                <p><strong>Rotate Left:</strong> A</p>
+                <p><strong>Rotate Right:</strong> D</p>
+                <p><strong>Help:</strong> Press H</p>
+            `;
+            modalContent.appendChild(instructions);
+
+            // Created a close button
+            const closeButton = document.createElement('button');
+            closeButton.innerText = 'Close';
+           closeButton.id="closeBtn"
+            closeButton.addEventListener('click', () => {
+              window.location.href="index.html"
+            });
+
+            modalContent.appendChild(closeButton);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+           
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+
+        // // Show the control window when the page loads
+        window.onload = () => {
+            createControlWindow(); // Create and display control window
+        };
+
+    </script>
+</body>
+</html>

@@ -155,7 +155,7 @@ window.onload = function () {
             window.location.href = "game/game.html";    
             break;
             case 1:
-                alert("Options clicked!");
+                window.location.href="control.html"
                 break;
             case 2:
                 alert("Quit clicked!");
@@ -174,3 +174,9 @@ window.onload = function () {
         else drawControlBox();
     };
 };
+
+
+
+
+
+
