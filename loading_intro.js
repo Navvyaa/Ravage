@@ -155,7 +155,7 @@ window.onload = function () {
             window.location.href = "game/game.html";    
             break;
             case 1:
-                window.location.href="control.html"
+                window.location.href="assets/control.html"
                 break;
             case 2:
                 alert("Quit clicked!");
