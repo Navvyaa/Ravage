@@ -1,11 +1,14 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+
 const mapImage = new Image();
 mapImage.src = 'assets/map.jpg';
 const characterImage = new Image();
 characterImage.src = 'assets/character.png';
 const movingCharacterImage = new Image();
 movingCharacterImage.src = 'assets/person.png';
+const fireImage = new Image();
+fireImage.src = 'assets/fire.gif'; // Load the fire GIF
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -17,51 +20,60 @@ const step = 10;
 const keys = {};
 const characterScale = 0.07;
 
-// Function to convert canvas coordinates to world coordinates in pixels
-// Function to convert canvas coordinates to world coordinates in pixels
+// Convert canvas coordinates to world coordinates in pixels
 function convertToWorldCoordinates(x, y) {
-    // Get the adjusted offsets based on current zoom and position
-    const mapXOffset = position.x - (canvas.width / (2 * zoomLevel)); // Correct offset for X
-    const mapYOffset = position.y - (canvas.height / (2 * zoomLevel)); // Correct offset for Y
-
-    // Calculate world coordinates (in pixels)
-    const worldX = (x / zoomLevel) + mapXOffset; // Adjust for the current map position and zoom
-    const worldY = (y / zoomLevel) + mapYOffset; // Adjust for the current map position and zoom
-
+    const mapXOffset = position.x - (canvas.width / (2 * zoomLevel));
+    const mapYOffset = position.y - (canvas.height / (2 * zoomLevel));
+    const worldX = (x / zoomLevel) + mapXOffset;
+    const worldY = (y / zoomLevel) + mapYOffset;
     return { worldX, worldY };
 }
 
+// Class for fire effects
+class FireEffect {
+    constructor(x, y) {
+        this.x = x; // World coordinates
+        this.y = y; // World coordinates
+        this.startTime = Date.now();
+        this.duration = 1000; // Duration to show fire in milliseconds
+    }
 
+    isExpired() {
+        return Date.now() - this.startTime > this.duration;
+    }
+
+    draw(ctx) {
+        const canvasCoords = convertToCanvasCoordinates(this.x, this.y);
+        ctx.drawImage(fireImage, canvasCoords.x - 25, canvasCoords.y - 25, 50, 50);
+    }
+}
+
+let fireEffects = [];
 
 class Bullet {
     constructor(x, y, angle) {
-        this.x = x; // Initial canvas coordinates (in pixels)
-        this.y = y; // Initial canvas coordinates (in pixels)
+        this.x = x; // Canvas coordinates
+        this.y = y; // Canvas coordinates
         this.angle = angle;
         this.speed = 5; // Speed in pixels per update
     }
+
     update() {
-        // Update bullet position in canvas coordinates (in pixels)
         this.x += Math.sin(this.angle) * this.speed;
         this.y -= Math.cos(this.angle) * this.speed;
-    
-        // Convert bullet's position to world coordinates (in pixels)
+
         const { worldX, worldY } = convertToWorldCoordinates(this.x, this.y);
-    
-        // Debug output for checking the adjusted position
-        console.log('Bullet Canvas Position:', this.x, this.y);
-        console.log('Bullet World Position:', worldX, worldY);
-    
+
         // Check if the bullet hits a restricted area
         if (isWithinRestrictedArea(worldX, worldY)) {
+            fireEffects.push(new FireEffect(worldX, worldY)); // Create fire effect at world coordinates
             const index = bullets.indexOf(this);
             if (index > -1) {
                 bullets.splice(index, 1); // Remove bullet
             }
         }
     }
-    
-    
+
     draw() {
         ctx.fillStyle = 'red';
         ctx.beginPath();
@@ -69,7 +81,6 @@ class Bullet {
         ctx.fill();
     }
 }
-
 
 let bullets = [];
 const restrictedAreas = [
@@ -99,9 +110,6 @@ const restrictedAreas = [
 ];
 
 const missionArea = { x1: 3513, y1: 1953, x2: 4209, y2: 2521 };
-restrictedAreas.forEach(area => {
-    ctx.strokeRect(area.x1, area.y1, area.x2 - area.x1, area.y2 - area.y1);
-});
 
 let missionTriggered = false;
 let video;
@@ -112,6 +120,13 @@ function isWithinRestrictedArea(newX, newY) {
     );
 }
 
+function convertToCanvasCoordinates(worldX, worldY) {
+    const mapXOffset = position.x - (canvas.width / (2 * zoomLevel));
+    const mapYOffset = position.y - (canvas.height / (2 * zoomLevel));
+    const canvasX = (worldX - mapXOffset) * zoomLevel;
+    const canvasY = (worldY - mapYOffset) * zoomLevel;
+    return { x: canvasX, y: canvasY };
+}
 
 class MovingCharacter {
     constructor(x, y, direction) {
@@ -252,6 +267,10 @@ function draw() {
     });
 
     movingCharacters.forEach(character => character.draw());
+    fireEffects.forEach(effect => effect.draw(ctx)); // Draw fire effects
+
+    // Remove expired fire effects
+    fireEffects = fireEffects.filter(effect => !effect.isExpired());
 }
 
 function update() {
@@ -303,7 +322,6 @@ function update() {
 
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
-
     // if (event.key === '+') {
     //     zoomLevel = Math.min(zoomLevel + 0.1, 3);
     // } else if (event.key === '-') {
@@ -316,13 +334,12 @@ document.addEventListener('keydown', (event) => {
             (canvas.height / 2 - Math.cos(angle) * characterScale * characterImage.height * zoomLevel) / zoomLevel,
             angle
         );
-    
-        // Check initial position of bullet
+
         if (!isWithinRestrictedArea(bullet.x, bullet.y)) {
             bullets.push(bullet); // Only add if not in a restricted area
         }
     }
-    
+
     if (event.key === 'Enter') {
         exitVideo();
     }
@@ -339,7 +356,7 @@ function gameLoop() {
 }
 
 let imagesLoaded = 0;
-const totalImages = 3;
+const totalImages = 4; // Updated for fire effect
 
 mapImage.onload = () => {
     imagesLoaded++;
@@ -356,6 +373,13 @@ characterImage.onload = () => {
 };
 
 movingCharacterImage.onload = () => {
+    imagesLoaded++;
+    if (imagesLoaded === totalImages) {
+        gameLoop();
+    }
+};
+
+fireImage.onload = () => {
     imagesLoaded++;
     if (imagesLoaded === totalImages) {
         gameLoop();
