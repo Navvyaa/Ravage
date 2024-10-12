@@ -13,6 +13,9 @@ body {
     align-items: center;
     height: 100vh;
     background-color: #000;  
+    margin: 0;
+    padding: 0;
+            overflow: hidden;
 }
 canvas {
     display: block;
@@ -25,3 +28,43 @@ video {
     height: 100vh;
     object-fit: cover;
 }
+
+
+    
+            #controlModal{
+    background-color: red;
+    width:100vw;
+    height:100vh;
+    display: flex;
+        align-items:flex-end;
+    justify-content:flex-end;
+    background-image: url(assets/intro\ screen.png);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position-y:-100px;
+    
+    
+            }
+            #modalContent{
+    width:60%;
+    /* height:60%; */
+    /* background-color: black; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content:space-around;
+    font-size: 1.5em;
+    color:white;
+    padding:1%;
+    
+            }
+            #closeBtn{
+                min-width: 200px;
+                padding:10px;
+                font-size: 50%;
+                background-color: blue;
+                margin-top:10px;
+                color:white;
+                
+    
+            }
