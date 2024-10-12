@@ -16,3 +16,7 @@ body {
 canvas {
     border: 2px solid #ecf0f1;
 }
+video
+{
+    display: none;
+}

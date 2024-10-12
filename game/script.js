@@ -7,15 +7,14 @@ characterImage.src = 'assets/character.png';
 const movingCharacterImage = new Image();
 movingCharacterImage.src = 'assets/person.png';
 
-canvasWidth = canvas.width = window.innerWidth;
-canvasHeight = canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
 let angle = 0;
 let position = { x: 500, y: 0 };
 let zoomLevel = 1;
-const step = 2;
+const step = 10;
 const keys = {};
-
 const characterScale = 0.07;
 
 class Bullet {
@@ -29,6 +28,7 @@ class Bullet {
     update() {
         this.x += Math.sin(this.angle) * this.speed;
         this.y -= Math.cos(this.angle) * this.speed;
+        console.log(`Player Position: (${position.x}, ${position.y})`);
     }
 
     draw() {
@@ -40,19 +40,18 @@ class Bullet {
 }
 
 let bullets = [];
-
 const restrictedAreas = [
     { x1: 909, y1: 866, x2: 1290, y2: 1972 },
     { x1: 2569, y1: 2601, x2: 2913, y2: 2849 }
 ];
+const missionArea = { x1: 3513, y1: 1953, x2: 4209, y2: 2521 };
+let missionTriggered = false;
+let video;
 
 function isWithinRestrictedArea(newX, newY) {
-    for (const area of restrictedAreas) {
-        if (newX > area.x1 && newX < area.x2 && newY > area.y1 && newY < area.y2) {
-            return true;
-        }
-    }
-    return false;
+    return restrictedAreas.some(area => 
+        newX > area.x1 && newX < area.x2 && newY > area.y1 && newY < area.y2
+    );
 }
 
 class MovingCharacter {
@@ -91,8 +90,8 @@ class MovingCharacter {
 
 let movingCharacters = [];
 for (let i = 0; i < 20; i++) {
-    const x = Math.random() * canvasWidth;
-    const y = Math.random() * canvasHeight;
+    const x = Math.random() * canvas.width;
+    const y = Math.random() * canvas.height;
     const direction = Math.random() * 2 * Math.PI;
     movingCharacters.push(new MovingCharacter(x, y, direction));
 }
@@ -108,23 +107,59 @@ function handleCollisions() {
     }
 }
 
-function checkBulletCharacterCollisions() {
-    bullets.forEach((bullet, bulletIndex) => {
-        movingCharacters.forEach((character, charIndex) => {
-            const dx = bullet.x - character.x;
-            const dy = bullet.y - character.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
+function isWithinMissionArea(x, y) {
+    return (
+        x >= missionArea.x1 &&
+        x <= missionArea.x2 &&
+        y >= missionArea.y1 &&
+        y <= missionArea.y2
+    );
+}
 
-            if (distance < character.size / 2) {
-               
-                movingCharacters.splice(charIndex, 1);
-                bullets.splice(bulletIndex, 1);
+function mission() {
+    if (missionTriggered) return;
 
-               
-                console.log("Character blasted!");
-            }
-        });
-    });
+    video = document.createElement('video');
+    video.controls = false;
+    video.style.display = "block";
+    video.src = 'assets/mission1.mp4';
+    video.autoplay = true;
+    video.style.position = 'absolute';
+    video.style.top = 0;
+    video.style.left = 0;
+    video.style.width = '100vw';
+    video.style.height = '100vh';
+    video.style.zIndex = 2; 
+    document.body.appendChild(video);
+
+    video.oncanplay = () => {
+        if (video.requestFullscreen) {
+            video.requestFullscreen();
+        } else if (video.webkitRequestFullscreen) {
+            video.webkitRequestFullscreen();
+        } else if (video.msRequestFullscreen) {
+            video.msRequestFullscreen();
+        }
+    };
+
+    video.onended = () => {
+        document.body.removeChild(video);
+        position.x = 3300;
+        position.y = 1953;
+        missionTriggered = false;
+    };
+
+    missionTriggered = true;
+}
+
+function exitVideo() {
+    if (video) {
+        document.body.removeChild(video);
+        missionTriggered = false;
+        position.x = 3300;
+        position.y = 1953;
+        video = null;
+    }
 }
 
 function draw() {
@@ -133,14 +168,14 @@ function draw() {
     ctx.save();
     ctx.scale(zoomLevel, zoomLevel);
 
-    const mapX = Math.max(Math.min(-position.x + canvasWidth / (2 * zoomLevel), 0), -(mapImage.width - canvasWidth / zoomLevel));
-    const mapY = Math.max(Math.min(-position.y + canvasHeight / (2 * zoomLevel), 0), -(mapImage.height - canvasHeight / zoomLevel));
+    const mapX = Math.max(Math.min(-position.x + canvas.width / (2 * zoomLevel), 0), -(mapImage.width - canvas.width / zoomLevel));
+    const mapY = Math.max(Math.min(-position.y + canvas.height / (2 * zoomLevel), 0), -(mapImage.height - canvas.height / zoomLevel));
 
     ctx.drawImage(mapImage, mapX, mapY);
     ctx.restore();
 
     ctx.save();
-    ctx.translate(canvasWidth / 2, canvasHeight / 2);
+    ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate(angle);
 
     const characterWidth = characterImage.width * characterScale * zoomLevel;
@@ -174,8 +209,8 @@ function update() {
         newY += Math.cos(angle) * step;
     }
 
-    const halfCanvasWidth = (canvasWidth / 2) / zoomLevel;
-    const halfCanvasHeight = (canvasHeight / 2) / zoomLevel;
+    const halfCanvasWidth = (canvas.width / 2) / zoomLevel;
+    const halfCanvasHeight = (canvas.height / 2) / zoomLevel;
 
     newX = Math.max(halfCanvasWidth, Math.min(newX, mapImage.width - halfCanvasWidth));
     newY = Math.max(halfCanvasHeight, Math.min(newY, mapImage.height - halfCanvasHeight));
@@ -184,19 +219,22 @@ function update() {
         position.x = newX;
         position.y = newY;
     } else {
-        console.log("Restricted area, cannot move here!");
+        console.log("Restricted area, can't move here!");
+    }
+
+    if (isWithinMissionArea(position.x, position.y) && !missionTriggered) {
+        mission();
     }
 
     bullets.forEach((bullet, index) => {
         bullet.update();
-        if (bullet.x < 0 || bullet.x > canvasWidth || bullet.y < 0 || bullet.y > canvasHeight) {
+        if (bullet.x < 0 || bullet.x > canvas.width || bullet.y < 0 || bullet.y > canvas.height) {
             bullets.splice(index, 1);
         }
     });
 
     movingCharacters.forEach(character => character.move());
     handleCollisions();
-    checkBulletCharacterCollisions(); 
 }
 
 document.addEventListener('keydown', (event) => {
@@ -210,11 +248,15 @@ document.addEventListener('keydown', (event) => {
 
     if (event.key === ' ') {
         const bullet = new Bullet(
-            canvasWidth / 2 + Math.sin(angle) * characterScale * characterImage.width * zoomLevel,
-            canvasHeight / 2 - Math.cos(angle) * characterScale * characterImage.height * zoomLevel,
+            canvas.width / 2 + Math.sin(angle) * characterScale * characterImage.width * zoomLevel,
+            canvas.height / 2 - Math.cos(angle) * characterScale * characterImage.height * zoomLevel,
             angle
         );
         bullets.push(bullet);
+    }
+
+    if (event.key === 'Enter') {
+        exitVideo();
     }
 });
 
