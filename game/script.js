@@ -17,20 +17,51 @@ const step = 10;
 const keys = {};
 const characterScale = 0.07;
 
+// Function to convert canvas coordinates to world coordinates in pixels
+// Function to convert canvas coordinates to world coordinates in pixels
+function convertToWorldCoordinates(x, y) {
+    // Get the adjusted offsets based on current zoom and position
+    const mapXOffset = position.x - (canvas.width / (2 * zoomLevel)); // Correct offset for X
+    const mapYOffset = position.y - (canvas.height / (2 * zoomLevel)); // Correct offset for Y
+
+    // Calculate world coordinates (in pixels)
+    const worldX = (x / zoomLevel) + mapXOffset; // Adjust for the current map position and zoom
+    const worldY = (y / zoomLevel) + mapYOffset; // Adjust for the current map position and zoom
+
+    return { worldX, worldY };
+}
+
+
+
 class Bullet {
     constructor(x, y, angle) {
-        this.x = x;
-        this.y = y;
+        this.x = x; // Initial canvas coordinates (in pixels)
+        this.y = y; // Initial canvas coordinates (in pixels)
         this.angle = angle;
-        this.speed = 5;
+        this.speed = 5; // Speed in pixels per update
     }
-
     update() {
+        // Update bullet position in canvas coordinates (in pixels)
         this.x += Math.sin(this.angle) * this.speed;
         this.y -= Math.cos(this.angle) * this.speed;
-        
+    
+        // Convert bullet's position to world coordinates (in pixels)
+        const { worldX, worldY } = convertToWorldCoordinates(this.x, this.y);
+    
+        // Debug output for checking the adjusted position
+        console.log('Bullet Canvas Position:', this.x, this.y);
+        console.log('Bullet World Position:', worldX, worldY);
+    
+        // Check if the bullet hits a restricted area
+        if (isWithinRestrictedArea(worldX, worldY)) {
+            const index = bullets.indexOf(this);
+            if (index > -1) {
+                bullets.splice(index, 1); // Remove bullet
+            }
+        }
     }
-
+    
+    
     draw() {
         ctx.fillStyle = 'red';
         ctx.beginPath();
@@ -38,6 +69,7 @@ class Bullet {
         ctx.fill();
     }
 }
+
 
 let bullets = [];
 const restrictedAreas = [
@@ -65,15 +97,21 @@ const restrictedAreas = [
     { x1: 4823, y1: 1796, x2: 5062, y2: 2097 }, // Area 22
     { x1: 5009, y1: 3937, x2: 5391, y2: 4190 }, // Area 23
 ];
+
 const missionArea = { x1: 3513, y1: 1953, x2: 4209, y2: 2521 };
+restrictedAreas.forEach(area => {
+    ctx.strokeRect(area.x1, area.y1, area.x2 - area.x1, area.y2 - area.y1);
+});
+
 let missionTriggered = false;
 let video;
 
 function isWithinRestrictedArea(newX, newY) {
-    return restrictedAreas.some(area => 
+    return restrictedAreas.some(area =>
         newX > area.x1 && newX < area.x2 && newY > area.y1 && newY < area.y2
     );
 }
+
 
 class MovingCharacter {
     constructor(x, y, direction) {
@@ -82,6 +120,7 @@ class MovingCharacter {
         this.direction = direction;
         this.size = 30;
         this.speed = 0.5;
+        this.alive = true; // Track if the character is alive
     }
 
     move() {
@@ -105,7 +144,9 @@ class MovingCharacter {
     }
 
     draw() {
-        ctx.drawImage(movingCharacterImage, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+        if (this.alive) {
+            ctx.drawImage(movingCharacterImage, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
+        }
     }
 }
 
@@ -118,14 +159,16 @@ for (let i = 0; i < 20; i++) {
 }
 
 function handleCollisions() {
-    for (let i = 0; i < movingCharacters.length; i++) {
-        for (let j = i + 1; j < movingCharacters.length; j++) {
-            if (movingCharacters[i].checkCollision(movingCharacters[j])) {
-                movingCharacters[i].reverseDirection();
-                movingCharacters[j].reverseDirection();
+    movingCharacters.forEach((character, charIndex) => {
+        if (!character.alive) return; // Skip if character is already dead
+
+        bullets.forEach((bullet, bulletIndex) => {
+            if (character.checkCollision(bullet)) {
+                character.alive = false; // Mark character as dead
+                bullets.splice(bulletIndex, 1); // Remove the bullet
             }
-        }
-    }
+        });
+    });
 }
 
 function isWithinMissionArea(x, y) {
@@ -261,21 +304,25 @@ function update() {
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
 
-    if (event.key === '+') {
-        zoomLevel = Math.min(zoomLevel + 0.1, 3);
-    } else if (event.key === '-') {
-        zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
-    }
+    // if (event.key === '+') {
+    //     zoomLevel = Math.min(zoomLevel + 0.1, 3);
+    // } else if (event.key === '-') {
+    //     zoomLevel = Math.max(zoomLevel - 0.1, 0.5);
+    // }
 
     if (event.key === ' ') {
         const bullet = new Bullet(
-            canvas.width / 2 + Math.sin(angle) * characterScale * characterImage.width * zoomLevel,
-            canvas.height / 2 - Math.cos(angle) * characterScale * characterImage.height * zoomLevel,
+            (canvas.width / 2 + Math.sin(angle) * characterScale * characterImage.width * zoomLevel) / zoomLevel,
+            (canvas.height / 2 - Math.cos(angle) * characterScale * characterImage.height * zoomLevel) / zoomLevel,
             angle
         );
-        bullets.push(bullet);
+    
+        // Check initial position of bullet
+        if (!isWithinRestrictedArea(bullet.x, bullet.y)) {
+            bullets.push(bullet); // Only add if not in a restricted area
+        }
     }
-
+    
     if (event.key === 'Enter') {
         exitVideo();
     }
@@ -314,4 +361,3 @@ movingCharacterImage.onload = () => {
         gameLoop();
     }
 };
-
