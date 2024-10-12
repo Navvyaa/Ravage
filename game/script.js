@@ -108,6 +108,25 @@ function handleCollisions() {
     }
 }
 
+function checkBulletCharacterCollisions() {
+    bullets.forEach((bullet, bulletIndex) => {
+        movingCharacters.forEach((character, charIndex) => {
+            const dx = bullet.x - character.x;
+            const dy = bullet.y - character.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < character.size / 2) {
+               
+                movingCharacters.splice(charIndex, 1);
+                bullets.splice(bulletIndex, 1);
+
+               
+                console.log("Character blasted!");
+            }
+        });
+    });
+}
+
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -165,7 +184,7 @@ function update() {
         position.x = newX;
         position.y = newY;
     } else {
-        console.log("Restricted area,can not move here!!!!");
+        console.log("Restricted area, cannot move here!");
     }
 
     bullets.forEach((bullet, index) => {
@@ -175,9 +194,9 @@ function update() {
         }
     });
 
-
     movingCharacters.forEach(character => character.move());
     handleCollisions();
+    checkBulletCharacterCollisions(); 
 }
 
 document.addEventListener('keydown', (event) => {
