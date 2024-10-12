@@ -11,7 +11,7 @@ canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
 let angle = 0;
-let position = { x: 0, y: 0 };
+let position = { x: 500, y: 0 };
 let zoomLevel = 1;
 const step = 2;
 const keys = {};
@@ -40,6 +40,25 @@ class Bullet {
 }
 
 let bullets = [];
+
+const restrictedAreas = [
+    { x1: 909, y1: 866, x2: 1290, y2:1972 },
+    { x1: 2569, y1: 2601, x2: 2913, y2: 2849 }
+];
+
+function isWithinRestrictedArea(newX, newY) {
+    for (const area of restrictedAreas) {
+        if (
+            newX > area.x1 &&
+            newX < area.x2 &&
+            newY > area.y1 &&
+            newY < area.y2
+        ) {
+            return true;
+        }
+    }
+    return false;
+}
 
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -92,8 +111,12 @@ function update() {
     newX = Math.max(halfCanvasWidth, Math.min(newX, mapImage.width - halfCanvasWidth));
     newY = Math.max(halfCanvasHeight, Math.min(newY, mapImage.height - halfCanvasHeight));
 
-    position.x = newX;
-    position.y = newY;
+    if (!isWithinRestrictedArea(newX, newY)) {
+        position.x = newX;
+        position.y = newY;
+    } else {
+        console.log("Restricted area, can't move here!");
+    }
 
     bullets.forEach((bullet, index) => {
         bullet.update();
