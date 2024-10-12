@@ -28,7 +28,7 @@ class Bullet {
     update() {
         this.x += Math.sin(this.angle) * this.speed;
         this.y -= Math.cos(this.angle) * this.speed;
-        console.log(`Player Position: (${position.x}, ${position.y})`);
+        
     }
 
     draw() {
@@ -314,3 +314,4 @@ movingCharacterImage.onload = () => {
         gameLoop();
     }
 };
+
