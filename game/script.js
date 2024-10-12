@@ -7,8 +7,6 @@ characterImage.src = 'assets/character.png';
 
 canvasWidth=canvas.width = window.innerWidth;
 canvasHeight=canvas.height = window.innerHeight;
-// canvas.width = canvasWidth;
-// canvas.height = canvasHeight;
 
 let angle = 0;
 let position = { x: 500, y: 0 };
