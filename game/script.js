@@ -5,8 +5,8 @@ mapImage.src = 'assets/map.jpg';
 const characterImage = new Image();
 characterImage.src = 'assets/character.png';
 
-const canvasWidth = 800;
-const canvasHeight = 600;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 canvas.width = canvasWidth;
 canvas.height = canvasHeight;
 
