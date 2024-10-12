@@ -5,10 +5,8 @@ mapImage.src = 'assets/map.jpg';
 const characterImage = new Image();
 characterImage.src = 'assets/character.png';
 
-const canvasWidth = 800;
-const canvasHeight = 600;
-canvas.width = canvasWidth;
-canvas.height = canvasHeight;
+canvasWidth=canvas.width = window.innerWidth;
+canvasHeight=canvas.height = window.innerHeight;
 
 let angle = 0;
 let position = { x: 500, y: 0 };

@@ -10,7 +10,7 @@ window.onload = function () {
 
     const buttons = [
         { text: 'Play', x: 0, y: 0, width: 100, height: 50 },
-        { text: 'Options', x: 0, y: 0, width: 100, height: 50 },
+        { text: 'Controls', x: 0, y: 0, width: 100, height: 50 },
         { text: 'Quit', x: 0, y: 0, width: 100, height: 50 }
     ];
     let selectedButton = 0;
@@ -30,7 +30,7 @@ window.onload = function () {
     function drawLoadingScreen(progress) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#fff";
-        ctx.font = "30px Arial";
+        ctx.font = "35px 'Press Start 2P'";
         ctx.textAlign = "center";
         ctx.fillText("LOADING..", canvas.width / 2, canvas.height / 2 - 50);
         ctx.fillStyle = "#333";
@@ -38,11 +38,11 @@ window.onload = function () {
         ctx.fillStyle = "#ff0000";
         ctx.fillRect(progressBarX, progressBarY, (progress / total) * progressBarWidth, progressBarHeight);
         ctx.fillStyle = "#fff";
-        ctx.font = "20px Arial";
+        ctx.font = "20px 'Press Start 2P'";
         ctx.fillText(`${Math.floor(progress)}%`, canvas.width / 2, progressBarY + progressBarHeight / 1.5);
         if (loadingComplete) {
             ctx.fillStyle = "#fff";
-            ctx.font = "24px Arial";
+            ctx.font = "20px 'Press Start 2P'";
             ctx.fillText("Press Enter to Start", canvas.width / 2, progressBarY + progressBarHeight + 40);
         }
     }
@@ -104,7 +104,7 @@ window.onload = function () {
 
         ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
         
-        ctx.font = "24px Arial";
+        ctx.font = "24px 'Press Start 2P'";
         ctx.textAlign = "left";
 
         buttons.forEach((button, index) => {
@@ -209,7 +209,6 @@ window.onload = function () {
             window.location.href = "game/game.html";    
             break;
             case 1:
-                // window.location.href="control.html"
                 createControlWindow();
                 break;
             case 2:
