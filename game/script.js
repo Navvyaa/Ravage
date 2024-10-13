@@ -231,43 +231,7 @@ function convertToCanvasCoordinates(worldX, worldY) {
     return { x: canvasX, y: canvasY };
 }
 
-// Class for moving characters
-class MovingCharacter {
-    constructor(x, y, direction) {
-        this.x = x;
-        this.y = y;
-        this.direction = direction;
-        this.size = 30;
-        this.speed = 0.5;
-        this.alive = true;
-    }
 
-    move() {
-        this.x += Math.cos(this.direction) * this.speed;
-        this.y += Math.sin(this.direction) * this.speed;
-
-        if (this.x < 0 || this.x > mapImage.width || this.y < 0 || this.y > mapImage.height) {
-            this.direction += Math.PI;
-        }
-    }
-
-    checkCollision(other) {
-        const dx = other.x - this.x;
-        const dy = other.y - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance < this.size;
-    }
-
-    reverseDirection() {
-        this.direction += Math.PI;
-    }
-
-    draw() {
-        if (this.alive) {
-            ctx.drawImage(movingCharacterImage, this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
-        }
-    }
-}
 
 // Class for the car
 class Car {
@@ -380,75 +344,173 @@ function drawCars() {
     cars.forEach(car => car.draw());
 
 }
-// function draw() {
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-//     ctx.save();
-//     ctx.scale(zoomLevel, zoomLevel);
-
-//     const mapX = Math.max(Math.min(-position.x + canvas.width / (2 * zoomLevel), 0), -(mapImage.width - canvas.width / zoomLevel));
-//     const mapY = Math.max(Math.min(-position.y + canvas.height / (2 * zoomLevel), 0), -(mapImage.height - canvas.height / zoomLevel));
-
-//     ctx.drawImage(mapImage, mapX, mapY);
-//     ctx.restore();
-
-//     ctx.save();
-//     ctx.translate(canvas.width / 2, canvas.height / 2);
-//     ctx.rotate(angle);
-
-//     const characterWidth = characterImage.width * characterScale * zoomLevel;
-//     const characterHeight = characterImage.height * characterScale * zoomLevel;
-//     ctx.drawImage(characterImage, -characterWidth / 2, -characterHeight / 2, characterWidth, characterHeight);
-//     ctx.restore();
-
-//     bullets.forEach(bullet => {
-//         bullet.draw();
-//     });
-
-//     movingCharacters.forEach(character => character.draw());
-//     fireEffects.forEach(effect => effect.draw(ctx));
-
-//     fireEffects = fireEffects.filter(effect => !effect.isExpired());
-
-//     // Draw the health and police level bars
+const movingCharacterRestrictedAreas = [
+    // Vertical Rectangle roads
+    { x1: 578, y1: 6, x2: 855, y2: 2994 },
+    { x1: 4435, y1: 12, x2: 4736, y2: 3003 },
+    { x1: 3065, y1: 1226, x2: 3366, y2: 4746 },
+    { x1: 2111, y1: 2030, x2: 2388, y2: 4744 },
+    { x1: 594, y1: 4422, x2: 860, y2: 5400 },
+    { x1: 4440, y1: 3429, x2: 4712, y2: 5386 },
+    { x1: 2569, y1: 4762, x2: 2836, y2: 5388 },
+    { x1: 2578, y1: 12, x2: 2836, y2: 532 },
+    { x1: 1347, y1: 1230, x2: 1619, y2: 2294 },
     
-// }
-
-// const cars=[];
-// cars.push(new Car(789,10,792,2900,carImages[0]));
-// cars.push(new Car(590,6,718,2921,carImages[1]));
-// cars.push(new Car(594,4550,7088,5406,carImages[2]));
-// cars.push(new Car(709,4556,847,5400,carImages[3]));
-// cars.push(new Car(2125,3566,2249,4758,carImages[4]));
-// cars.push(new Car(1353,1229,1458,2169,carImages[5]));
-
-
-// const verticalRoads = [
-//     { x1: 590, y1: 6, x2: 718, y2: 2921 },   // First road
-//     { x1: 594, y1: 4550, x2: 708, y2: 5406 }, // Second road
-//     { x1: 709, y1: 4556, x2: 847, y2: 5400 }, // Third road
-//     { x1: 2125, y1: 3566, x2: 2249, y2: 4758 }, // Fourth road
-//     { x1: 1353, y1: 1229, x2: 1458, y2: 2169 }, // Fifth road
-//     { x1: 1462, y1: 1223, x2: 1605, y2: 2172 }, // Sixth road
-//     { x1: 3098, y1: 1231, x2: 3222, y2: 2852 }, // Seventh road
-//     { x1: 2130, y1: 2052, x2: 2249, y2: 3435 }, // Eighth road
-//     { x1: 2268, y1: 2047, x2: 2378, y2: 3425 }, // Ninth road
-//     { x1: 3236, y1: 1219, x2: 3360, y2: 2850 }, // Tenth road
-//     { x1: 3112, y1: 2862, x2: 3213, y2: 4755 }, // Eleventh road
-//     { x1: 3237, y1: 2867, x2: 3351, y2: 4760 }, // Twelfth road
-//     { x1: 2259, y1: 3570, x2: 2387, y2: 4757 }  // Thirteenth road
-// ];
-
-
-
-let movingCharacters = [];
-for (let i = 0; i < 100; i++) {
-    const x = Math.random() * canvas.width;
-    const y = Math.random() * canvas.height;
-    const direction = Math.random() * 2 * Math.PI;
-    movingCharacters.push(new MovingCharacter(x, y, direction));
-}
-
+    // Horizontal Rectangle roads
+    { x1: 6, y1: 1247, x2: 583, y2: 1510 },
+    { x1: 855, y1: 524, x2: 4435, y2: 811 },
+    { x1: 1357, y1: 1223, x2: 3366, y2: 1495 },
+    { x1: 4698, y1: 1233, x2: 5390, y2: 1506 },
+    { x1: 583, y1: 1997, x2: 2407, y2: 2312 },
+    { x1: 3103, y1: 2735, x2: 5399, y2: 3002 },
+    { x1: 1, y1: 2722, x2: 860, y2: 2994 },
+    { x1: -4, y1: 3422, x2: 2383, y2: 3704 },
+    { x1: -4, y1: 4403, x2: 851, y2: 4670 },
+    { x1: 851, y1: 4758, x2: 4703, y2: 5035 },
+    { x1: 4450, y1: 3445, x2: 5395, y2: 3703 },
+    { x1: 4726, y1: 4386, x2: 5395, y2: 4673 },
+    
+    
+        //house area
+        { x1: 1875, y1: 893, x2: 2243, y2: 1118 },  // Area 1
+        { x1: 967, y1: 2465, x2: 1316, y2: 2948 },  // Area 2
+        { x1: 1574, y1: 2785, x2: 1918, y2: 3220 }, // Area 3
+        { x1: 977, y1: 4008, x2: 1259, y2: 4582 },  // Area 4
+        { x1: 987, y1: 4338, x2: 1560, y2: 4582 },  // Area 5
+        { x1: 1698, y1: 4094, x2: 1961, y2: 4577 }, // Area 6
+        { x1: 2601, y1: 3573, x2: 2859, y2: 3946 }, // Area 7
+        { x1: 385, y1: 3894, x2: 748, y2: 4290 },   // Area 8
+        { x1: 2554, y1: 2594, x2: 2917, y2: 2857 }, // Area 9
+        { x1: 2597, y1: 1696, x2: 2888, y2: 2069 }, // Area 10
+        { x1: 3504, y1: 1309, x2: 3853, y2: 1792 }, // Area 11
+        { x1: 3643, y1: 3210, x2: 4197, y2: 3702 }, // Area 12
+        { x1: 3638, y1: 4042, x2: 4202, y2: 4572 }, // Area 13
+        { x1: 2912, y1: 908, x2: 3265, y2: 1113 },  // Area 14
+        { x1: 4871, y1: 110, x2: 5129, y2: 607 },   // Area 15
+        { x1: 69, y1: 205, x2: 413, y2: 693 },      // Area 16
+        { x1: 1789, y1: 62, x2: 2453, y2: 392 },    // Area 17
+        { x1: 2974, y1: 134, x2: 3538, y2: 358 },   // Area 18
+        { x1: 3915, y1: 1882, x2: 4230, y2: 2542 }, // Area 19
+        { x1: 3509, y1: 2202, x2: 4230, y2: 2527 }, // Area 20
+        { x1: 2640, y1: 4347, x2: 2854, y2: 4562 }, // Area 21
+        { x1: 4823, y1: 1796, x2: 5062, y2: 2097 }, // Area 22
+        { x1: 5009, y1: 3937, x2: 5391, y2: 4190 }, // Area 23
+    
+        // Tree Areas
+        { x1: 189, y1: 803, x2: 415, y2: 1029 },
+        { x1: 983, y1: 1089, x2: 1203, y2: 1309 },
+        { x1: 173, y1: 1629, x2: 411, y2: 1867 },
+        { x1: 205, y1: 1900, x2: 397, y2: 2092 },
+        { x1: 978, y1: 1506, x2: 1204, y2: 1732 },
+        { x1: 1539, y1: 872, x2: 1769, y2: 1102 },
+        { x1: 1759, y1: 1536, x2: 1989, y2: 1766 },
+        { x1: 2119, y1: 1557, x2: 2365, y2: 1803 },
+        { x1: 3773, y1: 234, x2: 3985, y2: 446 },
+        { x1: 4136, y1: 217, x2: 4362, y2: 443 },
+        { x1: 4852, y1: 773, x2: 5060, y2: 981 },
+        { x1: 3538, y1: 894, x2: 3750, y2: 1106 },
+        { x1: 3959, y1: 865, x2: 4217, y2: 1123 },
+        { x1: 5108, y1: 762, x2: 5370, y2: 1024 },
+        { x1: 4063, y1: 1299, x2: 4301, y2: 1537 },
+        { x1: 4064, y1: 1561, x2: 4294, y2: 1791 },
+        { x1: 3510, y1: 1961, x2: 3732, y2: 2183 },
+        { x1: 2641, y1: 2294, x2: 2881, y2: 2534 },
+        { x1: 2636, y1: 2876, x2: 2876, y2: 3116 },
+        { x1: 2628, y1: 3234, x2: 2878, y2: 3484 },
+        { x1: 1747, y1: 2358, x2: 1999, y2: 2610 },
+        { x1: 1376, y1: 2341, x2: 1638, y2: 2603 },
+        { x1: 581, y1: 3106, x2: 811, y2: 3336 },
+        { x1: 1023, y1: 3781, x2: 1283, y2: 4041 },
+        { x1: 1398, y1: 3801, x2: 1612, y2: 4015 },
+        { x1: 1733, y1: 3785, x2: 1983, y2: 4035 },
+        { x1: 1830, y1: 5096, x2: 2066, y2: 5332 },
+        { x1: 3377, y1: 5070, x2: 3613, y2: 5306 },
+        { x1: 4882, y1: 4791, x2: 5154, y2: 5063 },
+        { x1: 4908, y1: 5100, x2: 5138, y2: 5330 },
+        { x1: 3461, y1: 3610, x2: 3693, y2: 3842 },
+        { x1: 3432, y1: 4089, x2: 3656, y2: 4313 },
+        { x1: 4451, y1: 3080, x2: 4709, y2: 3338 },
+        { x1: 4745, y1: 3089, x2: 5007, y2: 3351 },
+    ];
+    
+    
+    
+    
+    
+    class MovingCharacter {
+        constructor(x, y, direction) {
+            this.x = x;
+            this.y = y;
+            this.direction = direction;
+            this.size = 60;
+            this.speed = 1;
+            this.alive = true; // Track if the character is alive
+        }
+    
+        move() {
+            const newX = this.x + Math.cos(this.direction) * this.speed;
+            const newY = this.y + Math.sin(this.direction) * this.speed;
+    
+            // Check if the new position is within the map boundaries
+            if (newX < 0 || newX > mapImage.width || newY < 0 || newY > mapImage.height) {
+                this.direction += Math.PI; // Reverse direction
+            } else if (isInRestrictedAreaForMovingChar(newX, newY)) {
+                // If the new position is in a restricted area, change direction randomly
+                this.direction = Math.random() * 2 * Math.PI;
+            } else {
+                // Update position if it's valid (not out of bounds and not in restricted area)
+                this.x = newX;
+                this.y = newY;
+            }
+        }
+    
+    
+        checkCollision(other) {
+            const dx = other.x - this.x;
+            const dy = other.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance < this.size;
+        }
+    
+        reverseDirection() {
+            this.direction += Math.PI;
+        }
+    
+        draw() {
+            if (this.alive) {
+                const canvasCoords = convertToCanvasCoordinates(this.x - this.size / 2, this.y - this.size / 2)
+                ctx.drawImage(movingCharacterImage, canvasCoords.x, canvasCoords.y, this.size, this.size);
+            }
+    
+        }
+    }
+    const movingCharacters = [];
+    const numCharacters = 2000;
+    
+    function isInRestrictedAreaForMovingChar(x, y) {
+        for (const area of movingCharacterRestrictedAreas) {
+            if (x >= area.x1 && x <= area.x2 && y >= area.y1 && y <= area.y2) {
+                return true; // The position is in a restricted area
+            }
+        }
+        return false; // The position is valid (not in a restricted area)
+    }
+    
+    while (movingCharacters.length < numCharacters) {
+        const x = Math.random() * 5408;
+        const y = Math.random() * 5408 ;
+        const {worldX,worldY} = convertToWorldCoordinates(x,y)
+        
+    
+        // Only generate a MovingCharacter if the position is valid
+        if (!isInRestrictedAreaForMovingChar(x, y)) {
+            const direction = Math.random() * 2 * Math.PI;
+            movingCharacters.push(new MovingCharacter(x,y, direction));
+            console.log("direction of movingCharacter",worldX,worldY);
+        }
+    }
+    
 function handleCollisions() {
     movingCharacters.forEach((character, charIndex) => {
         if (!character.alive) return;
