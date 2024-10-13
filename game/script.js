@@ -92,7 +92,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let angle = 0;
-let position = { x: 500, y: 0 };
+let position = { x: 600, y: 600 };
 let zoomLevel = 1;
 let step = 5;
 const keys = {};
