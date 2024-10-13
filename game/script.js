@@ -475,8 +475,10 @@ const movingCharacterRestrictedAreas = [
     
     
         checkCollision(other) {
-            const dx = other.x - this.x;
-            const dy = other.y - this.y;
+            const canvac = convertToCanvasCoordinates(this.x,this.y);
+            const dx = other.x - canvac.x;
+            const dy = other.y - canvac.y;
+            // console.log(canvac.x," ",canvac.y);
             const distance = Math.sqrt(dx * dx + dy * dy);
             return distance < this.size;
         }
@@ -494,7 +496,7 @@ const movingCharacterRestrictedAreas = [
         }
     }
     const movingCharacters = [];
-    const numCharacters = 250;
+    const numCharacters = 200;
     
     function isInRestrictedAreaForMovingChar(x, y) {
         for (const area of movingCharacterRestrictedAreas) {
@@ -662,7 +664,6 @@ function draw() {
 function update() {
     let newX = position.x;
     let newY = position.y;
-    console.log(mission_number,policeLevel);
     if (keys['a']) {
         angle -= 0.05;
     }
@@ -710,7 +711,6 @@ document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
 
     if (event.key === 'f') {
-        console.log(characterImage.src);
         
         // Change to police car imagec
         if (!isPoliceCar) { // If current character is not a police car
