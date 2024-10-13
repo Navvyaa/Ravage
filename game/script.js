@@ -672,7 +672,7 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'f') {
         console.log(characterImage.src);
          // Change to police car image
-         if(characterImage.src === 'http://127.0.0.1:5501/assets/character.png')
+         if(characterImage.src.endsWith('character.png'))
             
         {
             step = 10;
