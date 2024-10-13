@@ -500,14 +500,14 @@ const movingCharacterRestrictedAreas = [
     while (movingCharacters.length < numCharacters) {
         const x = Math.random() * 5408;
         const y = Math.random() * 5408 ;
-        const {worldX,worldY} = convertToWorldCoordinates(x,y)
+        
         
     
         // Only generate a MovingCharacter if the position is valid
         if (!isInRestrictedAreaForMovingChar(x, y)) {
             const direction = Math.random() * 2 * Math.PI;
             movingCharacters.push(new MovingCharacter(x,y, direction));
-            console.log("direction of movingCharacter",worldX,worldY);
+           
         }
     }
     
