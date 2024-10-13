@@ -13,6 +13,10 @@ const movingCharacterImage = new Image();
 movingCharacterImage.src = 'assets/person.png';
 const fireImage = new Image();
 fireImage.src = 'assets/fire.gif'; // Load the fire GIF
+const policeCarImage = new Image();
+policeCarImage.src = 'assets/police_cars.png'; // Load police car image
+
+let currentCharacterImage = characterImage; // Use currentCharacterImage to track the image
 
 function drawBars() {
     // Health Bar
@@ -87,9 +91,9 @@ canvas.height = window.innerHeight;
 let angle = 0;
 let position = { x: 500, y: 0 };
 let zoomLevel = 1;
-const step = 10;
+let step = 5;
 const keys = {};
-const characterScale = 0.07;
+let characterScale = 0.07;
 
 function convertToWorldCoordinates(x, y) {
     const mapXOffset = position.x - (canvas.width / (2 * zoomLevel));
@@ -549,6 +553,7 @@ function mission() {
     video.style.height = '100vh';
     video.style.zIndex = 2;
     document.body.appendChild(video);
+    policeLevel = 0;
 
     video.oncanplay = () => {
         if (video.requestFullscreen) {
@@ -663,7 +668,27 @@ function update() {
 
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
-
+    console.log(event.key);
+    if (event.key === 'f') {
+        console.log(characterImage.src);
+         // Change to police car image
+         if(characterImage.src === 'http://127.0.0.1:5501/assets/character.png')
+            
+        {
+            step = 10;
+            
+        characterImage.src = 'assets/police_cars.png';
+        characterScale = 0.5;
+        console.log("f character to police");
+        }
+        else
+        { 
+            step = 5;
+            characterImage.src = 'assets/character.png';
+            characterScale = 0.07;
+        }
+    }
+   
     if (event.key === ' ') {
         const bullet = new Bullet(
             (canvas.width / 2 + Math.sin(angle) * characterScale * characterImage.width * zoomLevel) / zoomLevel,
