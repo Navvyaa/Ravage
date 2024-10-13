@@ -486,7 +486,7 @@ const movingCharacterRestrictedAreas = [
         }
     }
     const movingCharacters = [];
-    const numCharacters = 2000;
+    const numCharacters = 150;
     
     function isInRestrictedAreaForMovingChar(x, y) {
         for (const area of movingCharacterRestrictedAreas) {
