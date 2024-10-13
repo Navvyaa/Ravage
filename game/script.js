@@ -1,6 +1,9 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-
+let health = 100; // Initial health
+let policeLevel = 0; // Initial police level
+const starImage = new Image();
+starImage.src = 'assets/star.png'; // Load your star image
 // Load images
 const mapImage = new Image();
 mapImage.src = 'assets/map.jpg';
@@ -10,6 +13,49 @@ const movingCharacterImage = new Image();
 movingCharacterImage.src = 'assets/person.png';
 const fireImage = new Image();
 fireImage.src = 'assets/fire.gif'; // Load the fire GIF
+
+function drawBars() {
+    // Health Bar
+    const healthBarWidth = 200;
+    const healthBarHeight = 20;
+    const healthX = canvas.width - healthBarWidth - 20;
+    const healthY = 20;
+
+    // Draw Health Bar Heading
+    ctx.fillStyle = 'white';
+    ctx.font = '16px Arial';
+    ctx.fillText('Health', healthX + healthBarWidth / 2 - ctx.measureText('Health').width / 2, healthY - 5);
+
+    ctx.fillStyle = 'red';
+    ctx.fillRect(healthX, healthY, healthBarWidth, healthBarHeight);
+
+    ctx.fillStyle = 'green';
+    ctx.fillRect(healthX, healthY, healthBarWidth * (health / 100), healthBarHeight);
+
+    // Star-based Police Level
+    const starSize = 25; // Size of each star
+    const starSpacing = 5; // Space between stars
+    const starsX = canvas.width - (5 * starSize + 4 * starSpacing) - 20; // Adjust starting position
+    const starsY = healthY + healthBarHeight + 30; // Position stars below the health bar
+
+    // Draw Police Level Heading
+    ctx.fillStyle = 'white';
+    ctx.fillText('Wanted Level', starsX + 2 * (starSize + starSpacing) - ctx.measureText('Wanted Level').width / 2, starsY - 5);
+
+    // Draw stars according to the police level
+    const numberOfStars = Math.floor(policeLevel / 20); // 1 star for every 20% of police level
+
+    for (let i = 0; i < 5; i++) {
+        if (i < numberOfStars) {
+            ctx.drawImage(starImage, starsX + i * (starSize + starSpacing), starsY, starSize, starSize); // Full star
+        } else {
+            ctx.globalAlpha = 0.3; // Dim the empty stars
+            ctx.drawImage(starImage, starsX + i * (starSize + starSpacing), starsY, starSize, starSize); // Empty star
+            ctx.globalAlpha = 1.0; // Reset alpha
+        }
+    }
+}
+
 const carImages = [
     'assets/cars/car1.png',
     'assets/cars/car2.png',
@@ -334,6 +380,40 @@ function drawCars() {
     cars.forEach(car => car.draw());
 
 }
+// function draw() {
+//     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+//     ctx.save();
+//     ctx.scale(zoomLevel, zoomLevel);
+
+//     const mapX = Math.max(Math.min(-position.x + canvas.width / (2 * zoomLevel), 0), -(mapImage.width - canvas.width / zoomLevel));
+//     const mapY = Math.max(Math.min(-position.y + canvas.height / (2 * zoomLevel), 0), -(mapImage.height - canvas.height / zoomLevel));
+
+//     ctx.drawImage(mapImage, mapX, mapY);
+//     ctx.restore();
+
+//     ctx.save();
+//     ctx.translate(canvas.width / 2, canvas.height / 2);
+//     ctx.rotate(angle);
+
+//     const characterWidth = characterImage.width * characterScale * zoomLevel;
+//     const characterHeight = characterImage.height * characterScale * zoomLevel;
+//     ctx.drawImage(characterImage, -characterWidth / 2, -characterHeight / 2, characterWidth, characterHeight);
+//     ctx.restore();
+
+//     bullets.forEach(bullet => {
+//         bullet.draw();
+//     });
+
+//     movingCharacters.forEach(character => character.draw());
+//     fireEffects.forEach(effect => effect.draw(ctx));
+
+//     fireEffects = fireEffects.filter(effect => !effect.isExpired());
+
+//     // Draw the health and police level bars
+    
+// }
+
 // const cars=[];
 // cars.push(new Car(789,10,792,2900,carImages[0]));
 // cars.push(new Car(590,6,718,2921,carImages[1]));
@@ -362,7 +442,7 @@ function drawCars() {
 
 
 let movingCharacters = [];
-for (let i = 0; i < 20; i++) {
+for (let i = 0; i < 100; i++) {
     const x = Math.random() * canvas.width;
     const y = Math.random() * canvas.height;
     const direction = Math.random() * 2 * Math.PI;
@@ -377,6 +457,7 @@ function handleCollisions() {
             if (character.checkCollision(bullet)) {
                 character.alive = false;
                 bullets.splice(bulletIndex, 1);
+                policeLevel += 5; // Increase police level on hit
             }
         });
     });
@@ -468,7 +549,8 @@ function draw() {
 
     // Update and draw the cars
     updateCars(); // Call the function to update cars
-    drawCars(); // Call the function to draw cars
+    drawCars();
+    drawBars(); // Call the function to draw cars
 
     fireEffects = fireEffects.filter(effect => !effect.isExpired());
 }
