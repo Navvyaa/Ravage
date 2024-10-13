@@ -96,7 +96,7 @@ let position = { x: 500, y: 0 };
 let zoomLevel = 1;
 let step = 5;
 const keys = {};
-let characterScale = 0.07;
+let characterScale = 2;
 
 function convertToWorldCoordinates(x, y) {
     const mapXOffset = position.x - (canvas.width / (2 * zoomLevel));
