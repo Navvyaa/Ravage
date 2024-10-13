@@ -149,12 +149,15 @@ window.onload = function () {
 
     // All the control instruction used in game 
     const instructions = document.createElement('div');
-    instructions.style.fontFamily = 'Arial, sans-serif';
+    instructions.id="controlText";
     instructions.innerHTML = `
         <p><strong>Move Forward:</strong> W</p>
         <p><strong>Move Backward:</strong> S</p>
         <p><strong>Rotate Left:</strong> A</p>
         <p><strong>Rotate Right:</strong> D</p>
+         <p><strong>Enter In Car Or Exit From Car:</strong> F</p>
+          <p><strong>Firing:</strong> Space bar</p>
+           <p><strong>Skip The Intro Video:</strong> Enter</p>
         
     `;
     modalContent.appendChild(instructions);

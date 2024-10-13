@@ -496,7 +496,7 @@ const movingCharacterRestrictedAreas = [
         }
     }
     const movingCharacters = [];
-    const numCharacters = 200;
+    const numCharacters = 100;
     
     function isInRestrictedAreaForMovingChar(x, y) {
         for (const area of movingCharacterRestrictedAreas) {
@@ -516,7 +516,7 @@ const movingCharacterRestrictedAreas = [
         // Only generate a MovingCharacter if the position is valid
         if (!isInRestrictedAreaForMovingChar(x, y)) {
             const direction = Math.random() * 2 * Math.PI;
-            movingCharacters.push(new MovingCharacter(x,y, direction));
+            movingCharacters.push(new MovingCharacter(Math.floor(x),Math.floor(y), direction));
            
         }
     }

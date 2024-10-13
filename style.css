@@ -1,68 +1,71 @@
 @font-face {
-    font-family: 'Press Start 2P';
-    src: url('assets/font/PressStart2P-vaV7.ttf') format('truetype'); /* Adjust the path if necessary */
-    font-weight: normal;
-    font-style: normal;
+  font-family: "Press Start 2P";
+  src: url("assets/font/PressStart2P-vaV7.ttf") format("truetype"); /* Adjust the path if necessary */
+  font-weight: normal;
+  font-style: normal;
 }
 body {
-    font-family: 'Press Start 2P', sans-serif;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #000;  
-    margin: 0;
-    padding: 0;
-            overflow: hidden;
+  font-family: "Press Start 2P", sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #000;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 canvas {
-    display: block;
-    position: absolute;
+  display: block;
+  position: absolute;
 }
 video {
-    display: none;
-    position: absolute;
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
+  display: none;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
 }
 
+/* Styling for Control Window */
 
-    
-            #controlModal{
-    background-color: red;
-    width:100vw;
-    height:100vh;
-    display: flex;
-        align-items:flex-end;
-    justify-content:flex-end;
-    background-image: url(assets/intro\ screen.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position-y:-100px;
-    
-    
-            }
-            #modalContent{
-    width:60%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content:space-around;
-    font-size: 1.5em;
-    color:white;
-    padding:1%;
-    
-            }
-            #closeBtn{
-                min-width: 200px;
-                padding:10px;
-                font-size: 50%;
-                background-color: blue;
-                margin-top:10px;
-                color:white;
-                
-    
-            }
+#controlModal {
+  background-color: red;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  background-image: url(assets/intro\ screen.png);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position-y: -100px;
+}
+#modalContent {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  font-size: 1.5em;
+  color: white;
+  padding: 1%;
+  text-align: center;
+}
+#closeBtn {
+  min-width: 200px;
+  padding: 10px;
+  font-size: 100%;
+  background-color: blue;
+  margin-top: 10px;
+  color: white;
+}
+#controlText p{
+ font-size: 0.8em;
+ color:red;
+}
+#controlText strong{
+    color:green;
+}
