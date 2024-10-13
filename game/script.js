@@ -16,6 +16,9 @@ fireImage.src = 'assets/fire.gif'; // Load the fire GIF
 const policeCarImage = new Image();
 policeCarImage.src = 'assets/police_cars.png'; // Load police car image
 
+let mission_number = 0;
+let address;
+
 let currentCharacterImage = characterImage; // Use currentCharacterImage to track the image
 
 function drawBars() {
@@ -140,6 +143,7 @@ class Bullet {
         if (isWithinRestrictedArea(worldX, worldY)) {
             fireEffects.push(new FireEffect(worldX, worldY));
             const index = bullets.indexOf(this);
+            policeLevel += 0.1;
             if (index > -1) {
                 bullets.splice(index, 1);
             }
@@ -539,12 +543,41 @@ function isWithinMissionArea(x, y) {
 }
 
 function mission() {
-    if (missionTriggered) return;
+    if (missionTriggered) return; // Prevent triggering another mission while one is ongoing
+    
+    if (mission_number > 2) {
+        alert("All Missions Completed");
+        position.x = 3300;
+        position.y = 1953;
+        policeLevel = 0;
+        return;
+    }
+    
+    // Corrected condition to use mission_number instead of mission
+    if (mission_number === 2 && policeLevel >= 100) { 
+        mission_number++;
+        alert("Mission Completed");
+        position.x = 3300;
+        position.y = 1953;
+        policeLevel = 0;
+        return;
+    }
+    else if(mission_number === 2 && policeLevel < 100){
+        alert("Mission Failed");
+        position.x = 3300;
+        mission_number = 1;
+        position.y = 1953;
+        policeLevel = 0;
+        return;
+    } 
+        
 
+    // Set up the video for the mission
+    const address = `assets/mission${mission_number}.mp4`;
     video = document.createElement('video');
     video.controls = false;
     video.style.display = "block";
-    video.src = 'assets/mission1.mp4';
+    video.src = address;
     video.autoplay = true;
     video.style.position = 'absolute';
     video.style.top = 0;
@@ -553,8 +586,12 @@ function mission() {
     video.style.height = '100vh';
     video.style.zIndex = 2;
     document.body.appendChild(video);
-    policeLevel = 0;
+    mission_number++;
+    position.x = 3300;
+        position.y = 1953;
+    policeLevel = 0; // Reset police level after the mission starts
 
+    // Handle full screen on video play
     video.oncanplay = () => {
         if (video.requestFullscreen) {
             video.requestFullscreen();
@@ -565,6 +602,7 @@ function mission() {
         }
     };
 
+    // After the video ends, reset the position and allow the next mission
     video.onended = () => {
         document.body.removeChild(video);
         position.x = 3300;
@@ -572,7 +610,7 @@ function mission() {
         missionTriggered = false;
     };
 
-    missionTriggered = true;
+    missionTriggered = true; // Mark the mission as triggered
 }
 
 function exitVideo() {
@@ -624,7 +662,7 @@ function draw() {
 function update() {
     let newX = position.x;
     let newY = position.y;
-
+    console.log(mission_number,policeLevel);
     if (keys['a']) {
         angle -= 0.05;
     }
