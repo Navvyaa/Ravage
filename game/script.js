@@ -35,7 +35,7 @@ class FireEffect {
         this.x = x; // World coordinates
         this.y = y; // World coordinates
         this.startTime = Date.now();
-        this.duration = 1000; // Duration to show fire in milliseconds
+        this.duration = 5000; // Duration to show fire in milliseconds
     }
 
     isExpired() {
