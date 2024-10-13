@@ -666,29 +666,32 @@ function update() {
     handleCollisions();
 }
 
+let isPoliceCar = false; // Flag to track whether the character is a police car or not
+
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
-    console.log(event.key);
+
     if (event.key === 'f') {
         console.log(characterImage.src);
-         // Change to police car image
-         if(characterImage.src.endsWith('character.png'))
-            
-        {
-            step = 10;
-            
-        characterImage.src = 'assets/police_cars.png';
-        characterScale = 0.5;
-        console.log("f character to police");
+        
+        // Change to police car imagec
+        if (!isPoliceCar) { // If current character is not a police car
+            step = 10; // Increase step for police car
+            characterImage.src = 'assets/police_cars.png'; // Change image to police car
+            characterScale = 0.5; // Adjust scale for police car
+            console.log("Changed character to police car");
+        } else { // If current character is a police car
+            step = 5; // Reset step for normal character
+            characterImage.src = 'assets/character.png'; // Change image back to normal character
+            characterScale = 0.07; // Reset scale for normal character
+            console.log("Changed character back to regular character");
         }
-        else
-        { 
-            step = 5;
-            characterImage.src = 'assets/character.png';
-            characterScale = 0.07;
-        }
+        
+        // Toggle the flag
+        isPoliceCar = !isPoliceCar; // Switch the flag to the opposite state
     }
-   
+
+
     if (event.key === ' ') {
         const bullet = new Bullet(
             (canvas.width / 2 + Math.sin(angle) * characterScale * characterImage.width * zoomLevel) / zoomLevel,
