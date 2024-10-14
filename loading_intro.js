@@ -124,12 +124,13 @@ window.onload = function () {
         window.addEventListener('keydown', handleKeyPress);
     }
 
-
+    let isControlWindowOpen = false; 
 
    //function createControlWindow is to introduce controls to run game  
    function createControlWindow() {
     
-
+    if (isControlWindowOpen) return;
+    isControlWindowOpen = true;
     canvas.style.display="none";
 
 
@@ -168,6 +169,7 @@ window.onload = function () {
    closeButton.id="closeBtn"
     closeButton.addEventListener('click', () => {
         document.body.removeChild(modal);
+        isControlWindowOpen = false;
     showImageScreen();
     });
 
@@ -194,6 +196,16 @@ window.onload = function () {
         });
     }
 
+    function closeControlWindow() {
+        isControlWindowOpen = false; // Reset the state when the window is closed
+        const modal = document.getElementById('controlModal');
+        if (modal) {
+            document.body.removeChild(modal);
+        }
+        showImageScreen(); // Assuming this function shows the previous screen
+    }
+    
+
     function handleKeyPress(event) {
         if (event.key === 'ArrowDown') {
             selectedButton = (selectedButton + 1) % buttons.length;
@@ -202,7 +214,11 @@ window.onload = function () {
             selectedButton = (selectedButton - 1 + buttons.length) % buttons.length;
             drawControlBox();
         } else if (event.key === 'Enter') {
-            handleButtonAction(selectedButton);
+            if (isControlWindowOpen) {
+                closeControlWindow(); // Close the window if it's currently open
+            } else {
+                handleButtonAction(selectedButton); // Perform the action for the selected button
+            }
         }
     }
 
@@ -213,6 +229,7 @@ window.onload = function () {
             break;
             case 1:
                 createControlWindow();
+                
                 break;
             case 2:
                 window.close();
