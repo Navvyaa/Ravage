@@ -1,10 +1,10 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-let health = 100; // Initial health
-let policeLevel = 0; // Initial police level
+let health = 100; 
+let policeLevel = 0; 
 const starImage = new Image();
-starImage.src = 'assets/star.PNG'; // Load your star image
-// Load images
+starImage.src = 'assets/star.PNG';
+
 const mapImage = new Image();
 mapImage.src = 'assets/map.jpg';
 const characterImage = new Image();
@@ -12,30 +12,30 @@ characterImage.src = 'assets/character.png';
 const movingCharacterImage = new Image();
 movingCharacterImage.src = 'assets/person.png';
 const fireImage = new Image();
-fireImage.src = 'assets/fire.gif'; // Load the fire GIF
+fireImage.src = 'assets/fire.gif'; 
 const policeCarImage = new Image();
-policeCarImage.src = 'assets/police_cars.png'; // Load police car image
-let helicopter = null; // Helicopter instance
-const helicopterImage = 'assets/helicopter.gif'; // Replace with your helicopter image path
+policeCarImage.src = 'assets/police_cars.png'; 
+let helicopter = null; 
+const helicopterImage = 'assets/helicopter.gif';
 
 const mainCharacter = {
     position: {
-        x: 100, // Initial X position
-        y: 100, // Initial Y position
+        x: 100, 
+        y: 100, 
     },
-    alive: true, // Track if the character is alive
+    alive: true, 
 };
 let mission_number = 0;
 let address;
 
-let currentCharacterImage = characterImage; // Use currentCharacterImage to track the image
+let currentCharacterImage = characterImage; 
 class Helicopter {
     constructor(image) {
-        this.x = 0; // Initial X position
-        this.y = 0; // Initial Y position
+        this.x = 0; 
+        this.y = 0; 
         this.image = new Image();
         this.image.src = image;
-        this.speed = 1; // Initial speed
+        this.speed = 1; 
     }
 
     update(targetX, targetY) {
@@ -44,7 +44,7 @@ class Helicopter {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (distance > 0) {
-            // Move towards the target
+            
             this.x += (dx / distance) * this.speed; 
             this.y += (dy / distance) * this.speed; 
         }
@@ -52,8 +52,8 @@ class Helicopter {
         {
             helicopter = null;
         }
-        // Check if the helicopter has reached the main character
-        if (distance < 50 && policeLevel >= 5) { // You can adjust this threshold as needed
+       
+        if (distance < 50 && policeLevel >= 5) { 
             alert("Game Over!");
             helicopter = null;
             window.location.href = "game.html";
@@ -62,7 +62,7 @@ class Helicopter {
 
     draw(ctx) {
         const canvasCoords = convertToCanvasCoordinates(this.x, this.y);
-        ctx.drawImage(this.image, canvasCoords.x - 50, canvasCoords.y - 50, 100, 100); // Draw the helicopter
+        ctx.drawImage(this.image, canvasCoords.x - 50, canvasCoords.y - 50, 100, 100); 
     }
 }
 
@@ -72,23 +72,23 @@ function initializeHelicopter() {
 
 function updateHelicopterSpeed() {
     if (helicopter) {
-        helicopter.speed = 5 + (policeLevel * 0.05); // Adjust speed based on police level
+        helicopter.speed = 5 + (policeLevel * 0.05);
     }
 }
 function manageHelicopter() {
     if (policeLevel <= 5) {
-        helicopter = null; // Remove the helicopter if police level is 0
+        helicopter = null; 
     }
 }
 
 function drawBars() {
-    // Health Bar
+  
     const healthBarWidth = 200;
     const healthBarHeight = 20;
     const healthX = canvas.width - healthBarWidth - 20;
     const healthY = 20;
 
-    // Draw Health Bar Heading
+    
     ctx.fillStyle = 'white';
     ctx.font = '16px Arial';
     ctx.fillText('Health', healthX + healthBarWidth / 2 - ctx.measureText('Health').width / 2, healthY - 5);
@@ -99,26 +99,26 @@ function drawBars() {
     ctx.fillStyle = 'green';
     ctx.fillRect(healthX, healthY, healthBarWidth * (health / 100), healthBarHeight);
 
-    // Star-based Police Level
-    const starSize = 25; // Size of each star
-    const starSpacing = 5; // Space between stars
-    const starsX = canvas.width - (5 * starSize + 4 * starSpacing) - 20; // Adjust starting position
-    const starsY = healthY + healthBarHeight + 30; // Position stars below the health bar
+   
+    const starSize = 25; 
+    const starSpacing = 5; 
+    const starsX = canvas.width - (5 * starSize + 4 * starSpacing) - 20; 
+    const starsY = healthY + healthBarHeight + 30; 
 
-    // Draw Police Level Heading
+  
     ctx.fillStyle = 'white';
     ctx.fillText('Wanted Level', starsX + 2 * (starSize + starSpacing) - ctx.measureText('Wanted Level').width / 2, starsY - 5);
 
-    // Draw stars according to the police level
-    const numberOfStars = Math.floor(policeLevel / 20); // 1 star for every 20% of police level
+    
+    const numberOfStars = Math.floor(policeLevel / 20);
 
     for (let i = 0; i < 5; i++) {
         if (i < numberOfStars) {
-            ctx.drawImage(starImage, starsX + i * (starSize + starSpacing), starsY, starSize, starSize); // Full star
+            ctx.drawImage(starImage, starsX + i * (starSize + starSpacing), starsY, starSize, starSize); 
         } else {
-            ctx.globalAlpha = 0.3; // Dim the empty stars
-            ctx.drawImage(starImage, starsX + i * (starSize + starSpacing), starsY, starSize, starSize); // Empty star
-            ctx.globalAlpha = 1.0; // Reset alpha
+            ctx.globalAlpha = 0.3; 
+            ctx.drawImage(starImage, starsX + i * (starSize + starSpacing), starsY, starSize, starSize); 
+            ctx.globalAlpha = 1.0;
         }
     }
 }
@@ -301,24 +301,23 @@ function convertToCanvasCoordinates(worldX, worldY) {
 
 
 
-// Class for the car
 class Car {
     constructor(x1, y1, x2, y2, image) {
-        this.startX = x1;   // Starting X coordinate
-        this.startY = y1;   // Starting Y coordinate
-        this.endX = x2;     // Ending X coordinate
-        this.endY = y2;     // Ending Y coordinate
-        this.currentX = x1; // Current X coordinate (initialized to start)
-        this.currentY = y1; // Current Y coordinate (initialized to start)
+        this.startX = x1;   
+        this.startY = y1;  
+        this.endX = x2;     
+        this.endY = y2;    
+        this.currentX = x1;
+        this.currentY = y1; 
         this.image = new Image();
         this.image.src = image;
-        this.speed = 3;     // Speed of car movement
-        this.progress = 0;  // Progress along the path (0 to 1)
-        this.direction = 1;  // 1 for forward, -1 for reverse
-        this.angle = 0;     // Angle for rotation (0 for normal, 180 for reverse)
-        this.size = 100;    // Size of the car for collision detection
-        this.alive = true;  // Track if the car is still functioning (alive)
-        this.isRespawning = false; // Track if the car is in the respawn delay
+        this.speed = 3;     
+        this.progress = 0;  
+        this.direction = 1;  
+        this.angle = 0;    
+        this.size = 100;    
+        this.alive = true;  
+        this.isRespawning = false; 
     }
 
     checkCollision(other) {
@@ -329,26 +328,26 @@ class Car {
         return distance < this.size;
     }
 
-    // Reset the car to its starting position after 4 seconds
+ 
     respawn() {
-        this.isRespawning = true; // Set the respawning flag
-        this.alive = false;       // Temporarily mark the car as not alive
+        this.isRespawning = true; 
+        this.alive = false;      
         
         setTimeout(() => {
-            // After 4 seconds, reset position and allow car to move again
+            
             this.currentX = this.startX;
             this.currentY = this.startY;
             this.progress = 0;
             this.direction = 1;
             this.angle = 0;
-            this.alive = true;   // Mark car as alive again
-            this.isRespawning = false; // Clear the respawning flag
-        }, 4000);  // 4 seconds delay (4000 milliseconds)
+            this.alive = true;   
+            this.isRespawning = false; 
+        }, 4000);  
     }
 
-    // Update car position
+  
     update() {
-        if (!this.alive || this.isRespawning) return; // Skip if car is dead or respawning
+        if (!this.alive || this.isRespawning) return; 
 
         let dx = this.endX - this.startX;
         let dy = this.endY - this.startY;
@@ -359,41 +358,36 @@ class Car {
         const characterBoundingBox = getCharacterBoundingBox();
     
         if (isCollision(carBoundingBox, characterBoundingBox)) {
-            return; // Stop the car if there's a collision
+            return; 
         }
-        // if (this.progress < 1) {
-        //     this.progress += this.speed / distance; // Update progress based on speed
-        //     this.currentX = this.startX + dx * this.progress;
-        //     this.currentY = this.startY + dy * this.progress;
-        // }
-        
+       
         if (this.progress >= 1 || this.progress <= 0) {
-            // Swap direction and rotate the car when it reaches the end
+           
             this.direction *= -1;
-            this.angle = (this.angle + 180) % 360; // Rotate 180 degrees
-            this.progress = Math.max(0, Math.min(1, this.progress)); // Keep progress within bounds
+            this.angle = (this.angle + 180) % 360; 
+            this.progress = Math.max(0, Math.min(1, this.progress)); 
 
-            // Swap start and end points for reverse direction
+      
             [this.startX, this.endX] = [this.endX, this.startX];
             [this.startY, this.endY] = [this.endY, this.startY];
         }
 
-        // Update current position based on progress
+        
         this.currentX = this.startX + dx * this.progress;
         this.currentY = this.startY + dy * this.progress;
     }
     getBoundingBox() {
         return {
             left: this.currentX - 25,
-            right: this.currentX + 75, // considering car image width as 100
+            right: this.currentX + 75, 
             top: this.currentY - 25,
-            bottom: this.currentY + 75, // considering car image height as 100
+            bottom: this.currentY + 75, 
         };
     }
     
-    // Draw the car
+   
     draw() {
-        if (!this.alive || this.isRespawning) return; // Skip drawing if car is dead or respawning
+        if (!this.alive || this.isRespawning) return; 
 
         const canvasCoords = convertToCanvasCoordinates(this.currentX, this.currentY);
         ctx.drawImage(this.image, canvasCoords.x - 25, canvasCoords.y - 25, 100, 100);
@@ -401,8 +395,6 @@ class Car {
 }
 
 
-// <area target="" alt="" title="" href="" coords="633,4,642,2980" shape="rect">
-// Initialize car with coordinates
 const car = new Car(789, 10, 792, 2900, carImages[0]);
 const car1 = new Car(633, 4, 642, 2980, carImages[1]);
 const car2 = new Car(1396, 1278, 1400, 2122, carImages[2]);
@@ -424,21 +416,21 @@ const car17 = new Car(2764, 66, 2774, 528, carImages[7]);
 const car18 = new Car(590, 4558, 690, 5375, carImages[8]);
 const car19 = new Car(737, 4440, 833, 5370, carImages[9]);
 
-const car20 = new Car(885, 4828, 2030, 4813, carImagesRO[2]); // 90 degrees rotation
-const car21 = new Car(885, 4980, 2454, 4966, carImagesRO[3]); // 90 degrees rotation
-const car22 = new Car(2931, 4831, 4333, 4845, carImagesRO[4]); // 90 degrees rotation
-const car23 = new Car(2941, 4965, 4319, 4969, carImagesRO[5]); // 90 degrees rotation
-const car24 = new Car(3437, 2777, 4381, 2782, carImagesRO[6]); // 90 degrees rotation
-const car25 = new Car(3484, 2930, 5359, 2939, carImagesRO[7]); // 90 degrees rotation
-const car26 = new Car(1663, 1411, 3050, 1425, carImagesRO[8]); // 90 degrees rotation
-const car27 = new Car(1648, 1302, 3127, 1293, carImagesRO[9]); // 90 degrees rotation
-const car28 = new Car(923, 626, 4338, 631, carImagesRO[0]); // Restart from carImages[0], 90 degrees rotation
-const car29 = new Car(981, 739, 4324, 744, carImagesRO[1]); // 90 degrees rotation
-const car30 = new Car(952, 2253, 1996, 2268, carImagesRO[2]); // 90 degrees rotation
-const car31 = new Car(1028, 2115, 2144, 2101, carImagesRO[3]); // 90 degrees rotation
-const car32 = new Car(2035, 3645, 41, 3659, carImagesRO[4]); // 90 degrees rotation
-const car33 = new Car(2020, 3499, 41, 3490, carImagesRO[5]); // 90 degrees rotation
-const car34 = new Car(4791, 1310, 5339, 1315, carImagesRO[6]); // 90 degrees rotation
+const car20 = new Car(885, 4828, 2030, 4813, carImagesRO[2]); 
+const car21 = new Car(885, 4980, 2454, 4966, carImagesRO[3]); 
+const car22 = new Car(2931, 4831, 4333, 4845, carImagesRO[4]); 
+const car23 = new Car(2941, 4965, 4319, 4969, carImagesRO[5]); 
+const car24 = new Car(3437, 2777, 4381, 2782, carImagesRO[6]); 
+const car25 = new Car(3484, 2930, 5359, 2939, carImagesRO[7]); 
+const car26 = new Car(1663, 1411, 3050, 1425, carImagesRO[8]); 
+const car27 = new Car(1648, 1302, 3127, 1293, carImagesRO[9]); 
+const car28 = new Car(923, 626, 4338, 631, carImagesRO[0]); 
+const car29 = new Car(981, 739, 4324, 744, carImagesRO[1]); 
+const car30 = new Car(952, 2253, 1996, 2268, carImagesRO[2]); 
+const car31 = new Car(1028, 2115, 2144, 2101, carImagesRO[3]); 
+const car32 = new Car(2035, 3645, 41, 3659, carImagesRO[4]); 
+const car33 = new Car(2020, 3499, 41, 3490, carImagesRO[5]);
+const car34 = new Car(4791, 1310, 5339, 1315, carImagesRO[6]); 
 
 
 const cars = [
@@ -484,29 +476,29 @@ const movingCharacterRestrictedAreas = [
     
     
         //house area
-        { x1: 1875, y1: 893, x2: 2243, y2: 1118 },  // Area 1
-        { x1: 967, y1: 2465, x2: 1316, y2: 2948 },  // Area 2
-        { x1: 1574, y1: 2785, x2: 1918, y2: 3220 }, // Area 3
-        { x1: 977, y1: 4008, x2: 1259, y2: 4582 },  // Area 4
-        { x1: 987, y1: 4338, x2: 1560, y2: 4582 },  // Area 5
-        { x1: 1698, y1: 4094, x2: 1961, y2: 4577 }, // Area 6
-        { x1: 2601, y1: 3573, x2: 2859, y2: 3946 }, // Area 7
-        { x1: 385, y1: 3894, x2: 748, y2: 4290 },   // Area 8
-        { x1: 2554, y1: 2594, x2: 2917, y2: 2857 }, // Area 9
-        { x1: 2597, y1: 1696, x2: 2888, y2: 2069 }, // Area 10
-        { x1: 3504, y1: 1309, x2: 3853, y2: 1792 }, // Area 11
-        { x1: 3643, y1: 3210, x2: 4197, y2: 3702 }, // Area 12
-        { x1: 3638, y1: 4042, x2: 4202, y2: 4572 }, // Area 13
-        { x1: 2912, y1: 908, x2: 3265, y2: 1113 },  // Area 14
-        { x1: 4871, y1: 110, x2: 5129, y2: 607 },   // Area 15
-        { x1: 69, y1: 205, x2: 413, y2: 693 },      // Area 16
-        { x1: 1789, y1: 62, x2: 2453, y2: 392 },    // Area 17
-        { x1: 2974, y1: 134, x2: 3538, y2: 358 },   // Area 18
-        { x1: 3915, y1: 1882, x2: 4230, y2: 2542 }, // Area 19
-        { x1: 3509, y1: 2202, x2: 4230, y2: 2527 }, // Area 20
-        { x1: 2640, y1: 4347, x2: 2854, y2: 4562 }, // Area 21
-        { x1: 4823, y1: 1796, x2: 5062, y2: 2097 }, // Area 22
-        { x1: 5009, y1: 3937, x2: 5391, y2: 4190 }, // Area 23
+        { x1: 967, y1: 2465, x2: 1316, y2: 2948 },  
+        { x1: 1574, y1: 2785, x2: 1918, y2: 3220 }, 
+        { x1: 977, y1: 4008, x2: 1259, y2: 4582 },  
+        { x1: 987, y1: 4338, x2: 1560, y2: 4582 },  
+        { x1: 1698, y1: 4094, x2: 1961, y2: 4577 }, 
+        { x1: 1875, y1: 893, x2: 2243, y2: 1118 },  
+        { x1: 2601, y1: 3573, x2: 2859, y2: 3946 }, 
+        { x1: 385, y1: 3894, x2: 748, y2: 4290 },   
+        { x1: 2554, y1: 2594, x2: 2917, y2: 2857 }, 
+        { x1: 2597, y1: 1696, x2: 2888, y2: 2069 }, 
+        { x1: 3504, y1: 1309, x2: 3853, y2: 1792 }, 
+        { x1: 3643, y1: 3210, x2: 4197, y2: 3702 },
+        { x1: 3638, y1: 4042, x2: 4202, y2: 4572 }, 
+        { x1: 2912, y1: 908, x2: 3265, y2: 1113 },  
+        { x1: 4871, y1: 110, x2: 5129, y2: 607 },   
+        { x1: 69, y1: 205, x2: 413, y2: 693 },      
+        { x1: 1789, y1: 62, x2: 2453, y2: 392 },    
+        { x1: 2974, y1: 134, x2: 3538, y2: 358 },   
+        { x1: 3915, y1: 1882, x2: 4230, y2: 2542 }, 
+        { x1: 3509, y1: 2202, x2: 4230, y2: 2527 }, 
+        { x1: 2640, y1: 4347, x2: 2854, y2: 4562 }, 
+        { x1: 4823, y1: 1796, x2: 5062, y2: 2097 }, 
+        { x1: 5009, y1: 3937, x2: 5391, y2: 4190 }, 
     
         // Tree Areas
         { x1: 189, y1: 803, x2: 415, y2: 1029 },
@@ -556,7 +548,7 @@ const movingCharacterRestrictedAreas = [
             this.direction = direction;
             this.size = 60;
             this.speed = 1;
-            this.alive = true; // Track if the character is alive
+            this.alive = true;
         }
     
         move() {
@@ -604,10 +596,10 @@ const movingCharacterRestrictedAreas = [
     function isInRestrictedAreaForMovingChar(x, y) {
         for (const area of movingCharacterRestrictedAreas) {
             if (x >= area.x1 && x <= area.x2 && y >= area.y1 && y <= area.y2) {
-                return true; // The position is in a restricted area
+                return true;
             }
         }
-        return false; // The position is valid (not in a restricted area)
+        return false; 
     }
     
     while (movingCharacters.length < numCharacters) {
@@ -632,7 +624,7 @@ function handleCollisions() {
             if (character.checkCollision(bullet)) {
                 character.alive = false;
                 bullets.splice(bulletIndex, 1);
-                policeLevel += 5; // Increase police level on hit
+                policeLevel += 5; 
                 if (policeLevel > 20 && !helicopter) {
                     initializeHelicopter();
                 }
@@ -642,16 +634,16 @@ function handleCollisions() {
 }
 function handleCarCollisions() {
     cars.forEach((car) => {
-        if (!car.alive || car.isRespawning) return; // Skip if the car is dead or respawning
+        if (!car.alive || car.isRespawning) return; 
 
         bullets.forEach((bullet, bulletIndex) => {
             if (car.checkCollision(bullet)) {
                 // Create a fire effect at the car's current position
                 fireEffects.push(new FireEffect(car.currentX, car.currentY));
 
-                car.respawn(); // Respawn the car after 4 seconds
-                bullets.splice(bulletIndex, 1); // Remove the bullet on collision
-                policeLevel += 10; // Increase police level on hit
+                car.respawn(); 
+                bullets.splice(bulletIndex, 1); 
+                policeLevel += 10; 
             }
         });
     });
@@ -671,7 +663,7 @@ function isWithinMissionArea(x, y) {
 }
 
 function mission() {
-    if (missionTriggered) return; // Prevent triggering another mission while one is ongoing
+    if (missionTriggered) return; 
     
     if (mission_number > 2) {
         alert("All Missions Completed");
@@ -681,8 +673,7 @@ function mission() {
         return;
     }
     
-    // Corrected condition to use mission_number instead of mission
-    if (mission_number === 2 && policeLevel >= 100) { 
+     if (mission_number === 2 && policeLevel >= 100) { 
         mission_number++;
         alert("Mission Completed");
         position.x = 3300;
@@ -701,7 +692,7 @@ function mission() {
         
 
     // Set up the video for the mission
-    address = 'assets/mission${mission_number}.mp4';
+    address = `assets/mission${mission_number}.mp4`;
     video = document.createElement('video');
     video.controls = false;
     video.style.display = "block";
@@ -717,7 +708,7 @@ function mission() {
     mission_number++;
     position.x = 3300;
         position.y = 1953;
-    policeLevel = 0; // Reset police level after the mission starts
+    policeLevel = 0; 
 
     // Handle full screen on video play
     video.oncanplay = () => {
@@ -778,12 +769,12 @@ function draw() {
     });
 
     movingCharacters.forEach(character => character.draw());
-    fireEffects.forEach(effect => effect.draw(ctx)); // Draw fire effects
+    fireEffects.forEach(effect => effect.draw(ctx));
 
     // Update and draw the cars
-    updateCars(); // Call the function to update cars
+    updateCars(); 
     drawCars();
-    drawBars(); // Call the function to draw cars
+    drawBars(); 
     
     fireEffects.forEach(effect => effect.draw(ctx));
     fireEffects = fireEffects.filter(effect => !effect.isExpired());
@@ -797,8 +788,8 @@ function isCollision(bbox1, bbox2) {
 }
 // Define bounding box for the character
 function getCharacterBoundingBox() {
-    const charWidth = 50; // Define character width
-    const charHeight = 50; // Define character height
+    const charWidth = 50; 
+    const charHeight = 50; 
     return {
         left: position.x - charWidth / 2,
         right: position.x + charWidth / 2,
@@ -807,8 +798,8 @@ function getCharacterBoundingBox() {
     };
 }
 function update() {
-    let newX = mainCharacter.position.x = position.x; // Access position from mainCharacter
-    let newY = mainCharacter.position.y = position.y;// Access position from mainCharacter
+    let newX = mainCharacter.position.x = position.x;
+    let newY = mainCharacter.position.y = position.y;
     if (keys['a']) {
         angle -= 0.05;
     }
@@ -823,8 +814,8 @@ function update() {
         newX -= Math.sin(angle) * step;
         newY += Math.cos(angle) * step;
     }
-    mainCharacter.position.x = newX; // Update position
-    mainCharacter.position.y = newY; // Update position
+    mainCharacter.position.x = newX; 
+    mainCharacter.position.y = newY; 
     const halfCanvasWidth = (canvas.width / 2) / zoomLevel;
     const halfCanvasHeight = (canvas.height / 2) / zoomLevel;
 
@@ -851,30 +842,30 @@ function update() {
     movingCharacters.forEach(character => character.move());
     handleCollisions();
     
-    handleCarCollisions(); // Check for car collisions
+    handleCarCollisions(); 
 }
 
-let isPoliceCar = false; // Flag to track whether the character is a police car or not
+let isPoliceCar = false; 
 
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
     if (event.key === 'f') {
         
         // Change to police car imagec
-        if (!isPoliceCar) { // If current character is not a police car
-            step = 10; // Increase step for police car
-            characterImage.src = 'assets/police_cars.png'; // Change image to police car
-            characterScale = 0.15; // Adjust scale for police car
+        if (!isPoliceCar) { 
+            step = 10; 
+            characterImage.src = 'assets/police_cars.png'; 
+            characterScale = 0.15; 
             console.log("Changed character to police car");
-        } else { // If current character is a police car
-            step = 5; // Reset step for normal character
-            characterImage.src = 'assets/character.png'; // Change image back to normal character
-            characterScale = 2; // Reset scale for normal character
+        } else { 
+            step = 5; 
+            characterImage.src = 'assets/character.png'; 
+            characterScale = 2; 
             console.log("Changed character back to regular character");
         }
         
         // Toggle the flag
-        isPoliceCar = !isPoliceCar; // Switch the flag to the opposite state
+        isPoliceCar = !isPoliceCar; 
     }
 
 
@@ -904,21 +895,21 @@ function gameLoop() {
     drawCars();
     update();
     draw();
-    updateHelicopterSpeed(); // Update helicopter speed based on police level
+    updateHelicopterSpeed();
 
     // Make the helicopter follow the main character
     if (helicopter) {
-        if (mainCharacter.alive) { // Ensure the main character is alive
-            helicopter.update(mainCharacter.position.x, mainCharacter.position.y); // Follow the main character
+        if (mainCharacter.alive) { 
+            helicopter.update(mainCharacter.position.x, mainCharacter.position.y); 
         }
     }
-    if (helicopter) helicopter.draw(ctx); // Draw the helicopter if it exists
+    if (helicopter) helicopter.draw(ctx); 
 
     requestAnimationFrame(gameLoop);
 }
 
 let imagesLoaded = 0;
-const totalImages = 6; // Updated for car images
+const totalImages = 6; 
 
 mapImage.onload = () => {
     imagesLoaded++;
