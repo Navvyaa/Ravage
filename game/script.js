@@ -4,7 +4,7 @@ let health = 100;
 let policeLevel = 0; 
 const starImage = new Image();
 starImage.src = 'assets/star.PNG';
-
+let newX,newY;
 const mapImage = new Image();
 mapImage.src = 'assets/map.jpg';
 const characterImage = new Image();
@@ -27,7 +27,19 @@ const mainCharacter = {
 };
 let mission_number = 0;
 let address;
-
+function drawGradient() {
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  
+    // Define gradient colors (red on sides, transparent in the middle)
+    gradient.addColorStop(0, 'red');
+    gradient.addColorStop(678 / canvas.width, 'transparent');
+    gradient.addColorStop(1 - (678 / canvas.width), 'transparent');
+    gradient.addColorStop(1, 'red');
+  
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  
 let currentCharacterImage = characterImage; 
 class Helicopter {
     constructor(image) {
@@ -763,7 +775,38 @@ function draw() {
     const characterHeight = characterImage.height * characterScale * zoomLevel;
     ctx.drawImage(characterImage, -characterWidth / 2, -characterHeight / 2, characterWidth, characterHeight);
     ctx.restore();
+    if (newX < 685) {
+        const gradient = ctx.createLinearGradient(0, 0, 678, 0);
+    gradient.addColorStop(0, 'rgba(255, 0, 0, 0.6)');
+    gradient.addColorStop(1, 'transparent');
 
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 678, canvas.height); // Draw gradient on left side
+    }
+    if (newX > 4720) {
+        const gradient = ctx.createLinearGradient(canvas.width - 678, 0, canvas.width, 0);
+    gradient.addColorStop(0, 'transparent');
+    gradient.addColorStop(1, 'rgba(255, 0, 0, 0.6)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(canvas.width - 678, 0, 678, canvas.height); // Draw gradient on right side
+    }
+    if (newY > 5085) {
+        const gradient = ctx.createLinearGradient(0, canvas.height - 678, 0, canvas.height);
+    gradient.addColorStop(0, 'transparent');
+    gradient.addColorStop(1, 'rgba(255, 0, 0, 0.6)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, canvas.height - 678, canvas.width, 678); // Draw gradient on bottom
+    }
+    if (newY < 324) {
+        const gradient = ctx.createLinearGradient(0, 0, 0, 678);
+    gradient.addColorStop(0, 'rgba(255, 0, 0, 0.6)');
+    gradient.addColorStop(1, 'transparent');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, 678); // Draw gradient on top
+    }
     bullets.forEach(bullet => {
         bullet.draw();
     });
@@ -798,8 +841,8 @@ function getCharacterBoundingBox() {
     };
 }
 function update() {
-    let newX = mainCharacter.position.x = position.x;
-    let newY = mainCharacter.position.y = position.y;
+    newX = mainCharacter.position.x = position.x;
+    newY = mainCharacter.position.y = position.y;
     if (keys['a']) {
         angle -= 0.05;
     }
@@ -821,6 +864,9 @@ function update() {
 
     newX = Math.max(halfCanvasWidth, Math.min(newX, mapImage.width - halfCanvasWidth));
     newY = Math.max(halfCanvasHeight, Math.min(newY, mapImage.height - halfCanvasHeight));
+
+   
+    console.log(newX,newY);
 
     if (!isWithinRestrictedArea(newX, newY)) {
         position.x = newX;
