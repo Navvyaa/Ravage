@@ -244,35 +244,58 @@ function convertToCanvasCoordinates(worldX, worldY) {
 // Class for the car
 class Car {
     constructor(x1, y1, x2, y2, image) {
-        this.startX = x1;
-        this.startY = y1;
-        this.endX = x2;
-        this.endY = y2;
-        this.currentX = x1;
-        this.currentY = y1;
+        this.startX = x1;   // Starting X coordinate
+        this.startY = y1;   // Starting Y coordinate
+        this.endX = x2;     // Ending X coordinate
+        this.endY = y2;     // Ending Y coordinate
+        this.currentX = x1; // Current X coordinate (initialized to start)
+        this.currentY = y1; // Current Y coordinate (initialized to start)
         this.image = new Image();
         this.image.src = image;
-        this.speed = 3; // Speed of car movement
-        this.progress = 0; // Progress along the path (0 to 1)
-        this.direction = 1; // 1 for forward, -1 for reverse
-        this.angle = 0; // Angle for rotation (0 for normal, 180 for reverse)
+        this.speed = 3;     // Speed of car movement
+        this.progress = 0;  // Progress along the path (0 to 1)
+        this.direction = 1;  // 1 for forward, -1 for reverse
+        this.angle = 0;     // Angle for rotation (0 for normal, 180 for reverse)
+        this.size = 100;    // Size of the car for collision detection
+        this.alive = true;  // Track if the car is still functioning (alive)
+        this.isRespawning = false; // Track if the car is in the respawn delay
+    }
+
+    checkCollision(other) {
+        const canvasCoords = convertToCanvasCoordinates(this.currentX, this.currentY);
+        const dx = other.x - canvasCoords.x;
+        const dy = other.y - canvasCoords.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < this.size;
+    }
+
+    // Reset the car to its starting position after 4 seconds
+    respawn() {
+        this.isRespawning = true; // Set the respawning flag
+        this.alive = false;       // Temporarily mark the car as not alive
+        
+        setTimeout(() => {
+            // After 4 seconds, reset position and allow car to move again
+            this.currentX = this.startX;
+            this.currentY = this.startY;
+            this.progress = 0;
+            this.direction = 1;
+            this.angle = 0;
+            this.alive = true;   // Mark car as alive again
+            this.isRespawning = false; // Clear the respawning flag
+        }, 4000);  // 4 seconds delay (4000 milliseconds)
     }
 
     // Update car position
     update() {
+        if (!this.alive || this.isRespawning) return; // Skip if car is dead or respawning
+
         let dx = this.endX - this.startX;
         let dy = this.endY - this.startY;
         let distance = Math.sqrt(dx * dx + dy * dy);
 
-        this.progress += this.speed / distance * this.direction;
+        this.progress += (this.speed / distance) * this.direction;
 
-
-        // if (this.progress < 1) {
-        //     this.progress += this.speed / distance; // Update progress based on speed
-        //     this.currentX = this.startX + dx * this.progress;
-        //     this.currentY = this.startY + dy * this.progress;
-        // }
-        
         if (this.progress >= 1 || this.progress <= 0) {
             // Swap direction and rotate the car when it reaches the end
             this.direction *= -1;
@@ -287,17 +310,18 @@ class Car {
         // Update current position based on progress
         this.currentX = this.startX + dx * this.progress;
         this.currentY = this.startY + dy * this.progress;
-    
-
     }
 
     // Draw the car
     draw() {
+        if (!this.alive || this.isRespawning) return; // Skip drawing if car is dead or respawning
+
         const canvasCoords = convertToCanvasCoordinates(this.currentX, this.currentY);
         ctx.drawImage(this.image, canvasCoords.x - 25, canvasCoords.y - 25, 100, 100);
     }
-
 }
+
+
 // <area target="" alt="" title="" href="" coords="633,4,642,2980" shape="rect">
 // Initialize car with coordinates
 const car = new Car(789, 10, 792, 2900, carImages[0]);
@@ -534,6 +558,26 @@ function handleCollisions() {
         });
     });
 }
+function handleCarCollisions() {
+    cars.forEach((car) => {
+        if (!car.alive || car.isRespawning) return; // Skip if the car is dead or respawning
+
+        bullets.forEach((bullet, bulletIndex) => {
+            if (car.checkCollision(bullet)) {
+                // Create a fire effect at the car's current position
+                fireEffects.push(new FireEffect(car.currentX, car.currentY));
+
+                car.respawn(); // Respawn the car after 4 seconds
+                bullets.splice(bulletIndex, 1); // Remove the bullet on collision
+                policeLevel += 10; // Increase police level on hit
+            }
+        });
+    });
+}
+
+
+
+
 
 function isWithinMissionArea(x, y) {
     return (
@@ -575,7 +619,7 @@ function mission() {
         
 
     // Set up the video for the mission
-    const address = `assets/mission${mission_number}.mp4`;
+    const address = 'assets/mission${mission_number}.mp4';
     video = document.createElement('video');
     video.controls = false;
     video.style.display = "block";
@@ -658,7 +702,8 @@ function draw() {
     updateCars(); // Call the function to update cars
     drawCars();
     drawBars(); // Call the function to draw cars
-
+    
+    fireEffects.forEach(effect => effect.draw(ctx));
     fireEffects = fireEffects.filter(effect => !effect.isExpired());
 }
 function update() {
@@ -703,6 +748,8 @@ function update() {
 
     movingCharacters.forEach(character => character.move());
     handleCollisions();
+    
+    handleCarCollisions(); // Check for car collisions
 }
 
 let isPoliceCar = false; // Flag to track whether the character is a police car or not
