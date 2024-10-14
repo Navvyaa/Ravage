@@ -639,7 +639,7 @@ class MovingCharacter {
     }
 }
 const movingCharacters = [];
-const numCharacters = 150;
+const numCharacters = 100;
 
 function isInRestrictedAreaForMovingChar(x, y) {
     for (const area of movingCharacterRestrictedAreas) {
