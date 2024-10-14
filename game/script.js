@@ -10,7 +10,7 @@ mapImage.src = 'assets/map.jpg';
 const characterImage = new Image();
 characterImage.src = 'assets/character.png';
 const movingCharacterImage = new Image();
-movingCharacterImage.src = 'assets/person.png';
+movingCharacterImage.src = 'assets/persons.png';
 const fireImage = new Image();
 fireImage.src = 'assets/fire.gif';
 const policeCarImage = new Image();
@@ -67,6 +67,7 @@ class Helicopter {
         }
         if (policeLevel <= 5) {
             helicopter = null;
+            
         }
 
         if (distance < 50 && policeLevel >= 5) {
