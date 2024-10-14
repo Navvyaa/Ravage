@@ -43,28 +43,32 @@ function drawGradient() {
 let currentCharacterImage = characterImage; 
 class Helicopter {
     constructor(image) {
-        this.x = 0; 
-        this.y = 0; 
+        this.x = newX - canvas.width / 2; 
+        this.y = newY - canvas.height / 2; 
         this.image = new Image();
         this.image.src = image;
         this.speed = 1; 
+        this.angle = 0; // Angle to rotate the helicopter
     }
 
+    // Method to update the helicopter's position and angle
     update(targetX, targetY) {
         const dx = targetX - this.x;
         const dy = targetY - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
+        // Calculate angle between helicopter and target (newX, newY)
+        this.angle = Math.atan2(dy, dx); // Rotation angle in radians
+
         if (distance > 0) {
-            
+            // Move helicopter towards the target
             this.x += (dx / distance) * this.speed; 
             this.y += (dy / distance) * this.speed; 
         }
-        if(policeLevel <= 5)
-        {
+        if (policeLevel <= 5) {
             helicopter = null;
         }
-       
+
         if (distance < 50 && policeLevel >= 5) { 
             alert("Game Over!");
             helicopter = null;
@@ -72,14 +76,47 @@ class Helicopter {
         }
     }
 
+    // Method to check collision with other objects
+    checkCollision(other) {
+        const canvasCoords = convertToCanvasCoordinates(this.x, this.y);
+        const dx = other.x - this.x;
+        const dy = other.y - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+        return distance < 70; // Assuming collision radius of 50
+    }
+
+    // Method to draw the helicopter with rotation
     draw(ctx) {
         const canvasCoords = convertToCanvasCoordinates(this.x, this.y);
-        ctx.drawImage(this.image, canvasCoords.x - 50, canvasCoords.y - 50, 100, 100); 
+
+        ctx.save(); // Save the current canvas state
+
+        // Translate to the helicopter's position
+        ctx.translate(canvasCoords.x, canvasCoords.y);
+
+        // Rotate the canvas by the helicopter's angle
+        ctx.rotate(this.angle);
+
+        // Draw the helicopter image, centered at its current position
+        ctx.drawImage(this.image, -50, -50, 100, 100); // -50, -50 to center the image
+
+        ctx.restore(); // Restore the canvas state (to remove rotation)
+    }
+
+    getBoundingBox() {
+        return {
+            left: this.x - 50,
+            right: this.x + 50, 
+            top: this.y - 50,
+            bottom: this.y + 50, 
+        };
     }
 }
 
+
 function initializeHelicopter() {
     helicopter = new Helicopter(helicopterImage);
+    console.log("helicopter");
 }
 
 function updateHelicopterSpeed() {
@@ -569,7 +606,7 @@ const movingCharacterRestrictedAreas = [
     
             // Check if the new position is within the map boundaries
             if (newX < 0 || newX > mapImage.width || newY < 0 || newY > mapImage.height) {
-                this.direction += Math.PI; // Reverse direction
+                this.direction += Math.PI/2; // Reverse direction
             } else if (isInRestrictedAreaForMovingChar(newX, newY)) {
                 // If the new position is in a restricted area, change direction randomly
                 this.direction = Math.random() * 2 * Math.PI;
@@ -637,7 +674,7 @@ function handleCollisions() {
                 character.alive = false;
                 bullets.splice(bulletIndex, 1);
                 policeLevel += 5; 
-                if (policeLevel > 20 && !helicopter) {
+                if (policeLevel > 5 && !helicopter) {
                     initializeHelicopter();
                 }
             }
@@ -646,7 +683,7 @@ function handleCollisions() {
 }
 function handleCarCollisions() {
     cars.forEach((car) => {
-        if (!car.alive || car.isRespawning) return; 
+        if (!car.alive || car.isRespawning) return;
 
         bullets.forEach((bullet, bulletIndex) => {
             if (car.checkCollision(bullet)) {
@@ -657,9 +694,18 @@ function handleCarCollisions() {
                 bullets.splice(bulletIndex, 1); 
                 policeLevel += 10; 
             }
+            
+            if (helicopter && helicopter.checkCollision(bullet)) { // Added null check for helicopter
+                fireEffects.push(new FireEffect(helicopter.x, helicopter.y)); // Use helicopter's y coordinate
+                helicopter = null;
+                initializeHelicopter(); // Reset the helicopter
+                bullets.splice(bulletIndex, 1); 
+                policeLevel += 5; 
+            }
         });
     });
 }
+
 
 
 
@@ -861,12 +907,10 @@ function update() {
     mainCharacter.position.y = newY; 
     const halfCanvasWidth = (canvas.width / 2) / zoomLevel;
     const halfCanvasHeight = (canvas.height / 2) / zoomLevel;
-
+    console.log(policeLevel);
     newX = Math.max(halfCanvasWidth, Math.min(newX, mapImage.width - halfCanvasWidth));
     newY = Math.max(halfCanvasHeight, Math.min(newY, mapImage.height - halfCanvasHeight));
 
-   
-    console.log(newX,newY);
 
     if (!isWithinRestrictedArea(newX, newY)) {
         position.x = newX;
