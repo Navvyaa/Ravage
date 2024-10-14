@@ -864,7 +864,7 @@ document.addEventListener('keydown', (event) => {
         if (!isPoliceCar) { // If current character is not a police car
             step = 10; // Increase step for police car
             characterImage.src = 'assets/police_cars.png'; // Change image to police car
-            characterScale = 0.5; // Adjust scale for police car
+            characterScale = 0.15; // Adjust scale for police car
             console.log("Changed character to police car");
         } else { // If current character is a police car
             step = 5; // Reset step for normal character
