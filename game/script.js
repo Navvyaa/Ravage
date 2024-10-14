@@ -295,7 +295,18 @@ class Car {
         let distance = Math.sqrt(dx * dx + dy * dy);
 
         this.progress += (this.speed / distance) * this.direction;
-
+        const carBoundingBox = this.getBoundingBox();
+        const characterBoundingBox = getCharacterBoundingBox();
+    
+        if (isCollision(carBoundingBox, characterBoundingBox)) {
+            return; // Stop the car if there's a collision
+        }
+        // if (this.progress < 1) {
+        //     this.progress += this.speed / distance; // Update progress based on speed
+        //     this.currentX = this.startX + dx * this.progress;
+        //     this.currentY = this.startY + dy * this.progress;
+        // }
+        
         if (this.progress >= 1 || this.progress <= 0) {
             // Swap direction and rotate the car when it reaches the end
             this.direction *= -1;
@@ -311,7 +322,15 @@ class Car {
         this.currentX = this.startX + dx * this.progress;
         this.currentY = this.startY + dy * this.progress;
     }
-
+    getBoundingBox() {
+        return {
+            left: this.currentX - 25,
+            right: this.currentX + 75, // considering car image width as 100
+            top: this.currentY - 25,
+            bottom: this.currentY + 75, // considering car image height as 100
+        };
+    }
+    
     // Draw the car
     draw() {
         if (!this.alive || this.isRespawning) return; // Skip drawing if car is dead or respawning
@@ -706,6 +725,24 @@ function draw() {
     fireEffects.forEach(effect => effect.draw(ctx));
     fireEffects = fireEffects.filter(effect => !effect.isExpired());
 }
+// Define character's position globally
+function isCollision(bbox1, bbox2) {
+    return !(bbox1.right < bbox2.left ||
+             bbox1.left > bbox2.right ||
+             bbox1.bottom < bbox2.top ||
+             bbox1.top > bbox2.bottom);
+}
+// Define bounding box for the character
+function getCharacterBoundingBox() {
+    const charWidth = 50; // Define character width
+    const charHeight = 50; // Define character height
+    return {
+        left: position.x - charWidth / 2,
+        right: position.x + charWidth / 2,
+        top: position.y - charHeight / 2,
+        bottom: position.y + charHeight / 2,
+    };
+}
 function update() {
     let newX = position.x;
     let newY = position.y;
@@ -756,7 +793,7 @@ let isPoliceCar = false; // Flag to track whether the character is a police car 
 
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
-
+    console.log(event);
     if (event.key === 'f') {
         
         // Change to police car imagec
@@ -768,7 +805,7 @@ document.addEventListener('keydown', (event) => {
         } else { // If current character is a police car
             step = 5; // Reset step for normal character
             characterImage.src = 'assets/character.png'; // Change image back to normal character
-            characterScale = 0.07; // Reset scale for normal character
+            characterScale = 2; // Reset scale for normal character
             console.log("Changed character back to regular character");
         }
         
