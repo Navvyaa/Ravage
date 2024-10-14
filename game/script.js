@@ -15,11 +15,71 @@ const fireImage = new Image();
 fireImage.src = 'assets/fire.gif'; // Load the fire GIF
 const policeCarImage = new Image();
 policeCarImage.src = 'assets/police_cars.png'; // Load police car image
+let helicopter = null; // Helicopter instance
+const helicopterImage = 'assets/helicopter.gif'; // Replace with your helicopter image path
 
+const mainCharacter = {
+    position: {
+        x: 100, // Initial X position
+        y: 100, // Initial Y position
+    },
+    alive: true, // Track if the character is alive
+};
 let mission_number = 0;
 let address;
 
 let currentCharacterImage = characterImage; // Use currentCharacterImage to track the image
+class Helicopter {
+    constructor(image) {
+        this.x = 0; // Initial X position
+        this.y = 0; // Initial Y position
+        this.image = new Image();
+        this.image.src = image;
+        this.speed = 1; // Initial speed
+    }
+
+    update(targetX, targetY) {
+        const dx = targetX - this.x;
+        const dy = targetY - this.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance > 0) {
+            // Move towards the target
+            this.x += (dx / distance) * this.speed; 
+            this.y += (dy / distance) * this.speed; 
+        }
+        if(policeLevel <= 5)
+        {
+            helicopter = null;
+        }
+        // Check if the helicopter has reached the main character
+        if (distance < 50 && policeLevel >= 5) { // You can adjust this threshold as needed
+            alert("Game Over!");
+            helicopter = null;
+            window.location.href = "game.html";
+        }
+    }
+
+    draw(ctx) {
+        const canvasCoords = convertToCanvasCoordinates(this.x, this.y);
+        ctx.drawImage(this.image, canvasCoords.x - 50, canvasCoords.y - 50, 100, 100); // Draw the helicopter
+    }
+}
+
+function initializeHelicopter() {
+    helicopter = new Helicopter(helicopterImage);
+}
+
+function updateHelicopterSpeed() {
+    if (helicopter) {
+        helicopter.speed = 5 + (policeLevel * 0.05); // Adjust speed based on police level
+    }
+}
+function manageHelicopter() {
+    if (policeLevel <= 5) {
+        helicopter = null; // Remove the helicopter if police level is 0
+    }
+}
 
 function drawBars() {
     // Health Bar
@@ -573,6 +633,9 @@ function handleCollisions() {
                 character.alive = false;
                 bullets.splice(bulletIndex, 1);
                 policeLevel += 5; // Increase police level on hit
+                if (policeLevel > 20 && !helicopter) {
+                    initializeHelicopter();
+                }
             }
         });
     });
@@ -638,7 +701,7 @@ function mission() {
         
 
     // Set up the video for the mission
-    const address = 'assets/mission${mission_number}.mp4';
+    address = 'assets/mission${mission_number}.mp4';
     video = document.createElement('video');
     video.controls = false;
     video.style.display = "block";
@@ -649,7 +712,7 @@ function mission() {
     video.style.left = 0;
     video.style.width = '100vw';
     video.style.height = '100vh';
-    video.style.zIndex = 2;
+    video.style.zIndex = 5;
     document.body.appendChild(video);
     mission_number++;
     position.x = 3300;
@@ -744,8 +807,8 @@ function getCharacterBoundingBox() {
     };
 }
 function update() {
-    let newX = position.x;
-    let newY = position.y;
+    let newX = mainCharacter.position.x = position.x; // Access position from mainCharacter
+    let newY = mainCharacter.position.y = position.y;// Access position from mainCharacter
     if (keys['a']) {
         angle -= 0.05;
     }
@@ -760,7 +823,8 @@ function update() {
         newX -= Math.sin(angle) * step;
         newY += Math.cos(angle) * step;
     }
-
+    mainCharacter.position.x = newX; // Update position
+    mainCharacter.position.y = newY; // Update position
     const halfCanvasWidth = (canvas.width / 2) / zoomLevel;
     const halfCanvasHeight = (canvas.height / 2) / zoomLevel;
 
@@ -774,6 +838,7 @@ function update() {
 
     if (isWithinMissionArea(position.x, position.y) && !missionTriggered) {
         mission();
+        console.log("mission");
     }
 
     bullets.forEach((bullet, index) => {
@@ -793,14 +858,13 @@ let isPoliceCar = false; // Flag to track whether the character is a police car 
 
 document.addEventListener('keydown', (event) => {
     keys[event.key] = true;
-    console.log(event);
     if (event.key === 'f') {
         
         // Change to police car imagec
         if (!isPoliceCar) { // If current character is not a police car
             step = 10; // Increase step for police car
             characterImage.src = 'assets/police_cars.png'; // Change image to police car
-            characterScale = 0.1; // Adjust scale for police car
+            characterScale = 0.5; // Adjust scale for police car
             console.log("Changed character to police car");
         } else { // If current character is a police car
             step = 5; // Reset step for normal character
@@ -840,6 +904,15 @@ function gameLoop() {
     drawCars();
     update();
     draw();
+    updateHelicopterSpeed(); // Update helicopter speed based on police level
+
+    // Make the helicopter follow the main character
+    if (helicopter) {
+        if (mainCharacter.alive) { // Ensure the main character is alive
+            helicopter.update(mainCharacter.position.x, mainCharacter.position.y); // Follow the main character
+        }
+    }
+    if (helicopter) helicopter.draw(ctx); // Draw the helicopter if it exists
 
     requestAnimationFrame(gameLoop);
 }
