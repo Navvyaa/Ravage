@@ -215,7 +215,7 @@ window.onload = function () {
                 createControlWindow();
                 break;
             case 2:
-                alert("Quit clicked!");
+                window.close();
                 break;
             default:
                 break;
