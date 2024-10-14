@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 let health = 100; // Initial health
 let policeLevel = 0; // Initial police level
 const starImage = new Image();
-starImage.src = 'assets/star.png'; // Load your star image
+starImage.src = 'assets/star.PNG'; // Load your star image
 // Load images
 const mapImage = new Image();
 mapImage.src = 'assets/map.jpg';
