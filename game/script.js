@@ -67,7 +67,7 @@ class Helicopter {
         }
         if (policeLevel <= 5) {
             helicopter = null;
-            
+
         }
 
         if (distance < 50 && policeLevel >= 5) {
@@ -181,22 +181,7 @@ const carImages = [
     'assets/cars/car5.png',
     'assets/cars/car6.png',
     'assets/cars/car7.png',
-    'assets/cars/car8.png',
-    'assets/cars/car9.png',
-    'assets/cars/car10.png'
-];
-const carImagesRO = [
-    'assets/carsRO/car1.png',
-    'assets/carsRO/car2.png',
-    'assets/carsRO/car3.png',
-    'assets/carsRO/car4.png',
-    'assets/carsRO/car5.png',
-    'assets/carsRO/car6.png',
-    'assets/carsRO/car7.png',
-    'assets/carsRO/car8.png',
-    'assets/carsRO/car9.png',
-    'assets/carsRO/car10.png'
-];
+]
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -352,22 +337,25 @@ function convertToCanvasCoordinates(worldX, worldY) {
 
 
 class Car {
-    constructor(x1, y1, x2, y2, image) {
-        this.startX = x1;
-        this.startY = y1;
-        this.endX = x2;
-        this.endY = y2;
-        this.currentX = x1;
-        this.currentY = y1;
+    constructor(image, points) {
+        // Validate and initialize waypoints
+        this.waypoints = [];
+        for (let i = 0; i < points.length; i += 2) {
+            this.waypoints.push({ x: points[i], y: points[i + 1] });
+        }
+        // Set initial position to the first waypoint
+        this.currentX = this.waypoints[0].x;
+        this.currentY = this.waypoints[0].y;
+        this.alive = true;
         this.image = new Image();
         this.image.src = image;
         this.speed = 3;
         this.progress = 0;
         this.direction = 1;
-        this.angle = 0;
+        this.angle = 0; // Initial angle (radians)
         this.size = 100;
-        this.alive = true;
-        this.isRespawning = false;
+        this.isPaused = false; // Flag to pause movement when collision is detected
+        this.currentWaypoint = 0; // Start from the first waypoint
     }
 
     checkCollision(other) {
@@ -377,55 +365,71 @@ class Car {
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance < this.size;
     }
-
-
-    respawn() {
-        this.isRespawning = true;
-        this.alive = false;
-
-        setTimeout(() => {
-
-            this.currentX = this.startX;
-            this.currentY = this.startY;
-            this.progress = 0;
-            this.direction = 1;
-            this.angle = 0;
-            this.alive = true;
-            this.isRespawning = false;
-        }, 4000);
-    }
-
-
+    
+    
     update() {
-        if (!this.alive || this.isRespawning) return;
+        // If the car is paused (i.e., in collision) or not moving, don't update its position
+        if (this.isPaused) return;
+        
+        const current = this.waypoints[this.currentWaypoint];
+        
+        // If the current waypoint is the last one, set its position and prepare for reset
+        if (this.currentWaypoint === this.waypoints.length - 1) {
+            this.currentX = current.x; // Set to the last waypoint
+            this.currentY = current.y;
+            // Reset to the first waypoint after a short delay (if needed)
+            this.reset();
+            return; // Exit the update function without moving
+        }
 
-        let dx = this.endX - this.startX;
-        let dy = this.endY - this.startY;
+        const next = this.waypoints[this.currentWaypoint + 1]; // Get the next waypoint
+        
+        let dx = next.x - current.x;
+        let dy = next.y - current.y;
         let distance = Math.sqrt(dx * dx + dy * dy);
-
+        
         this.progress += (this.speed / distance) * this.direction;
+        
         const carBoundingBox = this.getBoundingBox();
         const characterBoundingBox = getCharacterBoundingBox();
-
+        
+        // Check for collision
         if (isCollision(carBoundingBox, characterBoundingBox)) {
+            this.isPaused = true; // Pause movement if collision is detected
             return;
+        } else {
+            this.isPaused = false;
+        }
+        
+        // Continue moving if the progress reaches the end of the current segment
+        if (this.progress >= 1) {
+            this.progress = 0;  // Reset progress
+            this.currentWaypoint++; // Move to the next waypoint
+
+            // If the currentWaypoint exceeds the length, reset to the first waypoint
+            if (this.currentWaypoint >= this.waypoints.length) {
+                this.currentWaypoint = 0; // Reset to the first waypoint
+            }
+
+            // Rotate by angle
+            this.angle = Math.atan2(dy, dx); // Rotation angle in radians
         }
 
-        if (this.progress >= 1 || this.progress <= 0) {
-
-            this.direction *= -1;
-            this.angle = (this.angle + 180) % 360;
-            this.progress = Math.max(0, Math.min(1, this.progress));
-
-
-            [this.startX, this.endX] = [this.endX, this.startX];
-            [this.startY, this.endY] = [this.endY, this.startY];
-        }
-
-
-        this.currentX = this.startX + dx * this.progress;
-        this.currentY = this.startY + dy * this.progress;
+        // Update the car's current position based on progress
+        this.currentX = current.x + dx * this.progress;
+        this.currentY = current.y + dy * this.progress;
     }
+
+    reset() {
+        this.currentWaypoint = 0; // Reset to the first waypoint
+        this.progress = 0; // Reset progress to start again
+        this.angle = 0;
+    }
+
+    resumeMovement() {
+        this.isPaused = false; // Resume movement after collision is no longer detected
+    }
+
     getBoundingBox() {
         return {
             left: this.currentX - 25,
@@ -435,59 +439,39 @@ class Car {
         };
     }
 
-
     draw() {
-        if (!this.alive || this.isRespawning) return;
-
+        // Draw the car even if it's paused
         const canvasCoords = convertToCanvasCoordinates(this.currentX, this.currentY);
-        ctx.drawImage(this.image, canvasCoords.x - 25, canvasCoords.y - 25, 100, 100);
+
+        // Save the canvas state before applying transformations
+        ctx.save();
+
+        // Move to the car's position and rotate the canvas
+        ctx.translate(canvasCoords.x, canvasCoords.y);
+        ctx.rotate(this.angle);
+
+        ctx.drawImage(this.image, -50, -50, 100, 100); // Adjusting the origin to the car's center
+
+        // Restore the canvas state to avoid affecting other drawings
+        ctx.restore();
     }
 }
 
 
-const car = new Car(789, 10, 792, 2900, carImages[0]);
-const car1 = new Car(633, 4, 642, 2980, carImages[1]);
-const car2 = new Car(1396, 1278, 1400, 2122, carImages[2]);
-const car3 = new Car(1539, 1414, 1524, 2082, carImages[3]);
-const car4 = new Car(3151, 1443, 3155, 2656, carImages[4]);
-const car5 = new Car(3284, 1304, 3308, 2792, carImages[5]);
-const car6 = new Car(3170, 2903, 3165, 4824, carImages[6]);
-const car7 = new Car(3279, 3018, 3303, 4811, carImages[7]);
-const car8 = new Car(4514, 3530, 4524, 4680, carImages[8]);
-const car9 = new Car(2173, 2114, 2178, 4927, carImages[9]);
-const car10 = new Car(2321, 2101, 2306, 4962, carImages[0]);
-const car11 = new Car(4500, 30, 4514, 2896, carImages[1]);
-const car12 = new Car(4648, 51, 4658, 2889, carImages[2]);
-const car13 = new Car(4643, 5308, 4648, 3625, carImages[3]);
-const car14 = new Car(652, 5318, 647, 4583, carImages[4]);
-const car15 = new Car(790, 4464, 795, 5332, carImages[5]);
-const car16 = new Car(2645, 50, 2640, 575, carImages[6]);
-const car17 = new Car(2764, 66, 2774, 528, carImages[7]);
-const car18 = new Car(590, 4558, 690, 5375, carImages[8]);
-const car19 = new Car(737, 4440, 833, 5370, carImages[9]);
+// Example of creating a car with an array of points
+const car = new Car(carImages[0], [789, 10, 777, 637, 4637, 617, 4649, 2799, 5397, 2795]);
+const car1 = new Car(carImages[1], [2769, 9, 2781, 601, 4645, 625, 4641, 2789, 5397, 2801]);
+const car2 = new Car(carImages[2], [4648,45,4662,1329, 5361,1313]);
+const car3 = new Car(carImages[3], [641,25,641,1329, 41,1321]);
+const car4 = new Car(carImages[4], [2617,5369,2617,4849, 2161,4849,2161,2241,665,2249,665,1481,33,1481]);
+const car5 = new Car(carImages[5], [777,5321,777,4969, 4505,4953,4505,5345]);
+const car6 = new Car(carImages[6], [2633,41,2641,737,809,753,785,2105, 1401,2105,1401,1297,3265,1297,3289,4793,4489,4809,4513,3545,5345,3489]);
 
-const car20 = new Car(885, 4828, 2030, 4813, carImagesRO[2]);
-const car21 = new Car(885, 4980, 2454, 4966, carImagesRO[3]);
-const car22 = new Car(2931, 4831, 4333, 4845, carImagesRO[4]);
-const car23 = new Car(2941, 4965, 4319, 4969, carImagesRO[5]);
-const car24 = new Car(3437, 2777, 4381, 2782, carImagesRO[6]);
-const car25 = new Car(3484, 2930, 5359, 2939, carImagesRO[7]);
-const car26 = new Car(1663, 1411, 3050, 1425, carImagesRO[8]);
-const car27 = new Car(1648, 1302, 3127, 1293, carImagesRO[9]);
-const car28 = new Car(923, 626, 4338, 631, carImagesRO[0]);
-const car29 = new Car(981, 739, 4324, 744, carImagesRO[1]);
-const car30 = new Car(952, 2253, 1996, 2268, carImagesRO[2]);
-const car31 = new Car(1028, 2115, 2144, 2101, carImagesRO[3]);
-const car32 = new Car(2035, 3645, 41, 3659, carImagesRO[4]);
-const car33 = new Car(2020, 3499, 41, 3490, carImagesRO[5]);
-const car34 = new Car(4791, 1310, 5339, 1315, carImagesRO[6]);
+
 
 
 const cars = [
-    car, car1, car2, car3, car4, car5, car6, car7, car8, car9,
-    car10, car11, car12, car13, car14, car15, car16, car17, car18, car19,
-    car20, car21, car22, car23, car24, car25, car26, car27, car28, car29,
-    car30, car31, car32, car33, car34
+    car, car1,car2,car3,car4,car5,car6
 ];
 function updateCars() {
     cars.forEach(car => car.update());
@@ -599,21 +583,21 @@ class MovingCharacter {
         this.size = 60;
         this.speed = 1;
         this.alive = true;
-        this.avoidanceForce = 0.5; 
+        this.avoidanceForce = 0.5;
     }
 
     move() {
         const newX = this.x + Math.cos(this.direction) * this.speed;
         const newY = this.y + Math.sin(this.direction) * this.speed;
 
-        
+
         if (newX < 0 || newX > mapImage.width || newY < 0 || newY > mapImage.height) {
-            this.direction += Math.PI / 2; 
+            this.direction += Math.PI / 2;
         } else if (isInRestrictedAreaForMovingChar(newX, newY)) {
-           
+
             this.direction += Math.random() * 2 * this.avoidanceForce - this.avoidanceForce;
         } else {
-            
+
             this.x = newX;
             this.y = newY;
         }
@@ -623,7 +607,7 @@ class MovingCharacter {
         const canvac = convertToCanvasCoordinates(this.x, this.y);
         const dx = other.x - canvac.x;
         const dy = other.y - canvac.y;
-       
+
         const distance = Math.sqrt(dx * dx + dy * dy);
         return distance < this.size;
     }
@@ -684,14 +668,12 @@ function handleCollisions() {
 }
 function handleCarCollisions() {
     cars.forEach((car) => {
-        if (!car.alive || car.isRespawning) return;
 
         bullets.forEach((bullet, bulletIndex) => {
             if (car.checkCollision(bullet)) {
                 // Create a fire effect at the car's current position
                 fireEffects.push(new FireEffect(car.currentX, car.currentY));
-
-                car.respawn();
+                car.reset();
                 bullets.splice(bulletIndex, 1);
                 policeLevel += 10;
             }
@@ -751,7 +733,7 @@ function mission() {
 
 
     // Set up the video for the mission
-    address = `assets/mission${mission_number}.mp4`;
+    address = 'assets/mission${mission_number}.mp4';
     video = document.createElement('video');
     video.controls = false;
     video.style.display = "block";
@@ -982,8 +964,22 @@ document.addEventListener('keyup', (event) => {
 });
 
 function gameLoop() {
-    updateCars();
-    drawCars();
+    cars.forEach((car) => {
+        car.update();  // Update each car's position
+
+        // Get the bounding boxes for the current car and the main character
+        const carBoundingBox = car.getBoundingBox();
+        const characterBoundingBox = getCharacterBoundingBox();
+
+        // Check if there's no collision
+        if (!isCollision(carBoundingBox, characterBoundingBox)) {
+            car.resumeMovement();  // Resume movement for cars not in collision
+        }
+
+        car.draw();  // Draw each car
+    });
+
+    car.draw();
     update();
     draw();
     updateHelicopterSpeed();
