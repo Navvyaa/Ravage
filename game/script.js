@@ -450,7 +450,7 @@ class Car {
         ctx.translate(canvasCoords.x, canvasCoords.y);
         ctx.rotate(this.angle);
 
-        ctx.drawImage(this.image, -50, -50, 100, 100); // Adjusting the origin to the car's center
+        // ctx.drawImage(this.image, -50, -50, 100, 100); // Adjusting the origin to the car's center
 
         // Restore the canvas state to avoid affecting other drawings
         ctx.restore();
@@ -770,7 +770,7 @@ function mission() {
 
 
     // Set up the video for the mission
-    address = 'assets/mission${mission_number}.mp4';
+    address = `assets/mission${mission_number}.mp4`;
     video = document.createElement('video');
     video.controls = false;
     video.style.display = "block";
@@ -923,8 +923,7 @@ function update() {
         newX -= Math.sin(angle) * step;
         newY += Math.cos(angle) * step;
     }
-    mainCharacter.position.x = newX;
-    mainCharacter.position.y = newY;
+    
     const halfCanvasWidth = (canvas.width / 2) / zoomLevel;
     const halfCanvasHeight = (canvas.height / 2) / zoomLevel;
     console.log(policeLevel);
@@ -937,7 +936,8 @@ function update() {
         position.x = newX;
         position.y = newY;
     }
-
+    mainCharacter.position.x = position.x;
+    mainCharacter.position.y = position.y;
     if (isWithinMissionArea(position.x, position.y) && !missionTriggered) {
         mission();
         console.log("mission");
