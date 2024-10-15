@@ -596,9 +596,9 @@ class MovingCharacter {
         this.y = y;
         this.direction = direction;
         this.size = 60;
-        this.speed = 1;
+        this.speed = 0.8;
         this.alive = true;
-        this.avoidanceForce = 0.5; 
+        this.avoidanceForce = 1; 
     }
 
     move() {
@@ -628,7 +628,7 @@ class MovingCharacter {
     }
 
     reverseDirection() {
-        this.direction += Math.PI;
+        this.direction += Math.random() * 2 * this.avoidanceForce - this.avoidanceForce;
     }
 
     draw() {
@@ -640,7 +640,7 @@ class MovingCharacter {
     }
 }
 const movingCharacters = [];
-const numCharacters = 100;
+const numCharacters = 200;
 
 function isInRestrictedAreaForMovingChar(x, y) {
     for (const area of movingCharacterRestrictedAreas) {
@@ -662,6 +662,43 @@ while (movingCharacters.length < numCharacters) {
         const direction = Math.random() * 2 * Math.PI;
         movingCharacters.push(new MovingCharacter(Math.floor(x), Math.floor(y), direction));
 
+    }
+}
+
+// moving character do not collide with main character
+mainCharacter.checkCollision = function(other) {
+    const dx = other.x - this.position.x;
+    const dy = other.y - this.position.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    return distance < other.size / 2; // Adjust collision size if needed
+};
+
+
+function updateCharacters() {
+    for (let i = 0; i < movingCharacters.length; i++) {
+        const char1 = movingCharacters[i];
+        char1.move(); // Move the character
+
+        // Check for collisions with other moving characters
+        for (let j = i + 1; j < movingCharacters.length; j++) {
+            const char2 = movingCharacters[j];
+            if (char1.checkCollision(char2)) {
+                // Handle collision by reversing directions
+                char1.reverseDirection();
+                char2.reverseDirection();
+            }
+        }
+
+        // Check collision between main character and moving character
+        if (mainCharacter.checkCollision(char1)) {
+            console.log("Collision detected with main character!");
+
+            // Handle what happens on collision here
+            // Example: Stop the main character's movement, reduce health, etc.
+            char1.reverseDirection();  // Example: Reverse main character's direction
+        }
+
+        char1.draw();
     }
 }
 
@@ -911,6 +948,7 @@ function update() {
     newX = Math.max(halfCanvasWidth, Math.min(newX, mapImage.width - halfCanvasWidth));
     newY = Math.max(halfCanvasHeight, Math.min(newY, mapImage.height - halfCanvasHeight));
 
+  
 
     if (!isWithinRestrictedArea(newX, newY)) {
         position.x = newX;
@@ -986,6 +1024,7 @@ function gameLoop() {
     update();
     draw();
     updateHelicopterSpeed();
+    updateCharacters();
 
     // Make the helicopter follow the main character
     if (helicopter) {
