@@ -450,7 +450,7 @@ class Car {
         ctx.translate(canvasCoords.x, canvasCoords.y);
         ctx.rotate(this.angle);
 
-        // ctx.drawImage(this.image, -50, -50, 100, 100); // Adjusting the origin to the car's center
+        ctx.drawImage(this.image, -50, -50, 100, 100); // Adjusting the origin to the car's center
 
         // Restore the canvas state to avoid affecting other drawings
         ctx.restore();
@@ -481,6 +481,7 @@ function drawCars() {
     cars.forEach(car => car.draw());
 
 }
+
 
 
 const movingCharacterRestrictedAreas = [
