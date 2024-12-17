@@ -18,6 +18,19 @@ policeCarImage.src = 'assets/police_cars.png';
 let helicopter = null;
 const helicopterImage = 'assets/helicopter.gif';
 
+
+function playBackgroundMusic() {
+    const backgroundMusic = new Audio('assets/conrol.mp3'); 
+    backgroundMusic.volume = 0.5; 
+    backgroundMusic.loop = true; 
+    backgroundMusic.play(); 
+}
+
+
+window.addEventListener('load', function() {
+    setTimeout(playBackgroundMusic, 1000); // Delay of 2000ms (2 seconds)
+});
+
 const mainCharacter = {
     position: {
         x: 100,
@@ -48,7 +61,14 @@ class Helicopter {
         this.image = new Image();
         this.image.src = image;
         this.speed = 1;
+        this.playPoliceSound();
         this.angle = 0; // Angle to rotate the helicopter
+    }
+    playPoliceSound() {
+        const policeSound = new Audio('assets/police.mp3'); 
+        policeSound.volume = .9; 
+        policeSound.loop = true; 
+        policeSound.play();
     }
 
     // Method to update the helicopter's position and angle
@@ -207,6 +227,7 @@ class FireEffect {
         this.y = y;
         this.startTime = Date.now();
         this.duration = 5000;
+        this.playExplosionSound();
     }
 
     isExpired() {
@@ -216,6 +237,11 @@ class FireEffect {
     draw(ctx) {
         const canvasCoords = convertToCanvasCoordinates(this.x, this.y);
         ctx.drawImage(fireImage, canvasCoords.x - 25, canvasCoords.y - 25, 50, 50);
+    }
+    playExplosionSound() {
+        const explosionSound = new Audio('assets/Explosion.mp3'); // Path to your sound file
+        explosionSound.volume = 0.7; // Optional: Adjust volume (0.0 to 1.0)
+        explosionSound.play();
     }
 }
 
@@ -227,6 +253,7 @@ class Bullet {
         this.y = y;
         this.angle = angle;
         this.speed = 5;
+        this.playGunSound();
     }
 
     update() {
@@ -250,6 +277,11 @@ class Bullet {
         ctx.beginPath();
         ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
         ctx.fill();
+    }
+    playGunSound() {
+        const gunSound = new Audio('assets/gun.mp3'); // Path to your sound file
+        gunSound.volume = 0.7; // Optional: Adjust volume (0.0 to 1.0)
+        gunSound.play();
     }
 }
 
@@ -458,7 +490,7 @@ class Car {
 }
 
 
-// Example of creating a car with an array of points
+
 const car = new Car(carImages[0], [789, 10, 777, 637, 4637, 617, 4649, 2799, 5397, 2795]);
 const car1 = new Car(carImages[1], [2769, 9, 2781, 601, 4645, 625, 4641, 2789, 5397, 2801]);
 const car2 = new Car(carImages[2], [4648,45,4662,1329, 5361,1313]);

@@ -87,12 +87,17 @@ window.onload = function () {
         videoElement.style.display = 'none';
         showImageScreen();
     }
-
+    let backgroundAudio = new Audio('assets/GTAudio/conrol.mp3'); 
     function showImageScreen() {
+
         canvas.style.display = 'block';
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(endImage, 0, 0, canvas.width, canvas.height);
         drawControlBox();
+        setTimeout(function() {
+            backgroundAudio.loop = true; // Ensure it loops until stopped
+            backgroundAudio.play();
+        }, 1000);
     }
 
     function drawControlBox() {
@@ -224,6 +229,10 @@ window.onload = function () {
     function handleButtonAction(index) {
         switch (index) {
             case 0:
+                if (backgroundAudio) {
+                    backgroundAudio.pause(); // Stop the audio
+                    backgroundAudio.currentTime = 0; // Reset the audio to the start
+                }
                 window.location.href = "game/game.html";
                 break;
             case 1:
