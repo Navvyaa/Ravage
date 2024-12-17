@@ -50,7 +50,7 @@ window.onload = function () {
     function loadGameAssets() {
         let loadInterval = setInterval(function () {
             if (loaded < total) {
-                loaded += 1;  
+                loaded += 1;
                 drawLoadingScreen(loaded);
             } else {
                 clearInterval(loadInterval);
@@ -103,7 +103,7 @@ window.onload = function () {
         const boxY = (canvas.height - boxHeight) / 2;
 
         ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
-        
+
         ctx.font = "24px 'Press Start 2P'";
         ctx.textAlign = "left";
 
@@ -124,60 +124,59 @@ window.onload = function () {
         window.addEventListener('keydown', handleKeyPress);
     }
 
-    let isControlWindowOpen = false; 
+    let isControlWindowOpen = false;
 
-   //function createControlWindow is to introduce controls to run game  
-   function createControlWindow() {
     
-    if (isControlWindowOpen) return;
-    isControlWindowOpen = true;
-    canvas.style.display="none";
+    function createControlWindow() {
+
+        if (isControlWindowOpen) return;
+        isControlWindowOpen = true;
+        canvas.style.display = "none";
 
 
-    const modal = document.createElement('div');
-    modal.setAttribute('id','controlModal');
-   
+        const modal = document.createElement('div');
+        modal.setAttribute('id', 'controlModal');
 
-    // Created the modal for content box
-    const modalContent = document.createElement('div');
-    modalContent.setAttribute('id','modalContent');
-    
 
-    // Created the heading for the modal
-    const header = document.createElement('h2');
-    header.innerText = 'Game Controls';
-    modalContent.appendChild(header);
+        
+        const modalContent = document.createElement('div');
+        modalContent.setAttribute('id', 'modalContent');
 
-    // All the control instruction used in game 
-    const instructions = document.createElement('div');
-    instructions.id="controlText";
-    instructions.innerHTML = `
+
+        
+        const header = document.createElement('h2');
+        header.innerText = 'Game Controls';
+        modalContent.appendChild(header);
+
+        
+        const instructions = document.createElement('div');
+        instructions.id = "controlText";
+        instructions.innerHTML = `
         <p><strong>Move Forward:</strong> W</p>
         <p><strong>Move Backward:</strong> S</p>
         <p><strong>Rotate Left:</strong> A</p>
         <p><strong>Rotate Right:</strong> D</p>
-         <p><strong>Enter In Car Or Exit From Car:</strong> F</p>
-          <p><strong>Firing:</strong> Space bar</p>
-           <p><strong>Skip The Intro Video:</strong> Enter</p>
+        <p><strong>Enter In Car Or Exit From Car:</strong> F</p>
+        <p><strong>Firing:</strong> Space bar</p>
         
     `;
-    modalContent.appendChild(instructions);
+        modalContent.appendChild(instructions);
 
-    // Created a close button to close control window
-    const closeButton = document.createElement('button');
-    closeButton.innerText = 'Close';
-   closeButton.id="closeBtn"
-    closeButton.addEventListener('click', () => {
-        document.body.removeChild(modal);
-        isControlWindowOpen = false;
-    showImageScreen();
-    });
+   
+        const closeButton = document.createElement('button');
+        closeButton.innerText = 'Close';
+        closeButton.id = "closeBtn"
+        closeButton.addEventListener('click', () => {
+            document.body.removeChild(modal);
+            isControlWindowOpen = false;
+            showImageScreen();
+        });
 
-    modalContent.appendChild(closeButton);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
+        modalContent.appendChild(closeButton);
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
 
-}
+    }
 
 
 
@@ -197,14 +196,14 @@ window.onload = function () {
     }
 
     function closeControlWindow() {
-        isControlWindowOpen = false; // Reset the state when the window is closed
+        isControlWindowOpen = false;
         const modal = document.getElementById('controlModal');
         if (modal) {
             document.body.removeChild(modal);
         }
-        showImageScreen(); // Assuming this function shows the previous screen
+        showImageScreen();
     }
-    
+
 
     function handleKeyPress(event) {
         if (event.key === 'ArrowDown') {
@@ -215,9 +214,9 @@ window.onload = function () {
             drawControlBox();
         } else if (event.key === 'Enter') {
             if (isControlWindowOpen) {
-                closeControlWindow(); // Close the window if it's currently open
+                closeControlWindow(); 
             } else {
-                handleButtonAction(selectedButton); // Perform the action for the selected button
+                handleButtonAction(selectedButton); 
             }
         }
     }
@@ -225,11 +224,11 @@ window.onload = function () {
     function handleButtonAction(index) {
         switch (index) {
             case 0:
-            window.location.href = "game/game.html";    
-            break;
+                window.location.href = "game/game.html";
+                break;
             case 1:
                 createControlWindow();
-                
+
                 break;
             case 2:
                 window.close();
@@ -241,7 +240,7 @@ window.onload = function () {
 
 
 
-// function to load game assets
+    
 
     loadGameAssets();
 
@@ -249,10 +248,35 @@ window.onload = function () {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         if (loaded < total) drawLoadingScreen(loaded);
-        else drawControlBox();
+        else showImageScreen();
     };
+    videoElement.addEventListener('play', function () {
+        setTimeout(function () {
+            if (!videoElement.paused && !videoElement.ended) {
+            const skipText = document.createElement('div');
+            skipText.innerText = 'Press Enter to Skip';
+            skipText.style.position = 'absolute';
+            skipText.style.top = '10px';
+            skipText.style.right = '30px';
+            skipText.style.color = '#fff';
+            skipText.style.font = "20px 'Press Start 2P'"; 
+            document.body.appendChild(skipText);
+
+            window.addEventListener('keydown', function (e) {
+                if (e.key === "Enter") {
+                    skipVideo();
+                    document.body.removeChild(skipText);
+                }
+            });
+
+            videoElement.onended = function () {
+                document.body.removeChild(skipText);
+                showImageScreen();
+            };
+        }
+        }, 5000);
+    });
 };
 
 
 
-     
