@@ -17,7 +17,7 @@ const policeCarImage = new Image();
 policeCarImage.src = 'assets/police_cars.png';
 let helicopter = null;
 const helicopterImage = 'assets/helicopter.gif';
-
+const missionArea = { x1: 3513, y1: 1953, x2: 4209, y2: 2521 };
 
 function playBackgroundMusic() {
     const backgroundMusic = new Audio('assets/conrol.mp3'); 
@@ -38,7 +38,66 @@ const mainCharacter = {
     },
     alive: true,
 };
+
+const missionCenter = {
+    x: (missionArea.x1 + missionArea.x2) / 2,
+    y: (missionArea.y1 + missionArea.y2) / 2,
+};
+
 let mission_number = 0;
+
+// Create a container for the arrow
+const arrowContainer = document.createElement('div');
+arrowContainer.style.position = 'absolute';
+arrowContainer.style.width = '0';
+arrowContainer.style.height = '0';
+document.body.appendChild(arrowContainer);
+
+// Create the arrowhead element
+const arrowhead = document.createElement('div');
+arrowhead.style.width = '0';
+arrowhead.style.height = '0';
+arrowhead.style.borderLeft = '10px solid transparent';
+arrowhead.style.borderRight = '10px solid transparent';
+arrowhead.style.borderBottom = '20px solid gray';
+arrowContainer.appendChild(arrowhead);
+
+// Create the tail element
+const tail = document.createElement('div');
+tail.style.position = 'absolute';
+tail.style.width = '4px';
+tail.style.height = '20px';
+tail.style.backgroundColor = 'gray';
+tail.style.top = '20px'; // Align the tail directly below the arrowhead
+tail.style.left = '8px'; // Center the tail under the arrowhead
+arrowContainer.appendChild(tail);
+
+function updateIndicator() {
+   
+    const characterX = mainCharacter.position.x;
+    const characterY = mainCharacter.position.y;
+
+    // Calculate direction vector to the mission area
+    const dx = missionCenter.x - characterX;
+    const dy = missionCenter.y - characterY;// Angle in radians
+    const angleToMission = Math.atan2(dy, dx);
+    // Update the position of the arrow container (centered on the main character)
+    arrowContainer.style.left = `${mainCharacter.x}px`;
+    arrowContainer.style.top = `${mainCharacter.y}px`;
+
+    // Rotate the entire arrow container to point towards the mission area
+    arrowContainer.style.transform = `rotate(${angleToMission}rad) rotate(90deg)`;
+    arrowContainer.style.transformOrigin = '50% 50%';
+
+    if(mission_number>2)
+        document.removeChild(arrowContainer);
+}
+
+
+// Call updateIndicator in your game loop or at regular intervals
+setInterval(updateIndicator, 1000 / 60); // 60 FPS
+
+
 let address;
 function drawGradient() {
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
@@ -347,7 +406,7 @@ const restrictedAreas = [
     , { x1: 5087, y1: 1608, x2: 5381, y2: 1902 }
 ];
 
-const missionArea = { x1: 3513, y1: 1953, x2: 4209, y2: 2521 };
+
 
 let missionTriggered = false;
 let video;
@@ -987,6 +1046,7 @@ function update() {
     handleCollisions();
 
     handleCarCollisions();
+    updateIndicator();
 }
 
 let isPoliceCar = false;
