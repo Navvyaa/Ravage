@@ -54,3 +54,13 @@ Used to style the game interface and create visually engaging elements, ensuring
 ### JavaScript (Vanilla):
 The heart of the game's logic and interactivity. Handles everything from vehicle controls to dynamic features like the police system, missions, and character movements.
 
+## Team Members
+
+Meet the amazing team behind this project:
+
+| Name             | Role                | LinkedIn                                     | GitHub                                    |
+|------------------|---------------------|---------------------------------------------|------------------------------------------|
+| Navya Gupta       | Frontend Developer  | [LinkedIn](https://www.linkedin.com/in/navya-gupta-8663932a6/)    | [GitHub](https://github.com/Navvyaa)      |
+| Srayansh Gupta    | Frontend Developer  | [LinkedIn](https://www.linkedin.com/in/srayansh-gupta-483612282/) | [GitHub](https://github.com/SRAYANSH-GUPTA) |
+| Ritika Tiwari     | Frontend Developer  | [LinkedIn]()                                | [GitHub](https://github.com/ritika-tiwari7840) |
+
